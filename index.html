@@ -144,7 +144,7 @@ const clubPrice = i => i === 0 ? 570000 : Math.round(570000 * 20 ** i);
 const cMul = i => 1 + 2 * i;
 const refillCost = (m, i) => Math.max(0, Math.round((100 - m.stock) / 100 * 2500 * 1.9 ** step(m.lvl) * cMul(i)));
 const xpNeed = s => Math.round(100 * 1.6 ** step(s));
-const MAX_CLUBS = 5, MATCH_SEC = 50, ROUNDS = 14, SQUAD = 26, OFFLINE_RATE = 0.5, OFFLINE_CAP = 12 * 3600, MAX_SCOUTS = 3, TRAIN_SEC = 30;
+const MAX_CLUBS = 3, MATCH_SEC = 50, ROUNDS = 14, SQUAD = 26, OFFLINE_RATE = 0.5, OFFLINE_CAP = 12 * 3600, MAX_SCOUTS = 3, TRAIN_SEC = 30;
 const POS_NEED = { GOL: 3, DEF: 9, MEI: 7, ATA: 7 };
 const START_POS = ['GOL', 'DEF', 'DEF', 'DEF', 'DEF', 'MEI', 'MEI', 'MEI', 'ATA', 'ATA', 'ATA'];
 const XI_NEED = { GOL: 1, DEF: 4, MEI: 3, ATA: 3 };
@@ -168,13 +168,27 @@ const PANTRY = [
   { k: 'supl', n: 'Suplementos', i: '💊', d: '+40% de evolução nos treinos', p: 5000 }];
 const EQUIP = [{ k: 'bola', n: 'Bolas', i: '⚽', b: '⚽❓' }, { k: 'uni', n: 'Uniformes', i: '👕', b: '👕💢' }];
 const FAC = [
-  { k: 'campo', n: 'Campo de treino', i: '⚽', e: '+10% nos treinos técnico e de finalização' },
-  { k: 'pista', n: 'Pista aeróbica', i: '🏃', e: '+10% nos treinos aeróbicos' },
-  { k: 'academia', n: 'Academia', i: '🏋️', e: '+10% nos treinos de academia e menos lesões' },
-  { k: 'refeitorio', n: 'Refeitório', i: '🍽️', e: 'Comida recupera +10% de energia' },
-  { k: 'descanso', n: 'Área de descanso', i: '🏖️', e: '+15% de recuperação de energia' },
-  { k: 'massagem', n: 'Sala de massagem', i: '💆', e: '+10% de recuperação e menos lesões' }];
-const facCost = (lvl, i) => Math.round(40000 * 2.4 ** lvl * cMul(i));
+  { k: 'campo', n: 'Campo de treino', i: '⚽', e: '+10% nos treinos técnico e de finalização', cat: 'treino', base: 30000 },
+  { k: 'pista', n: 'Pista aeróbica', i: '🏃', e: '+10% nos treinos aeróbicos', cat: 'treino', base: 35000 },
+  { k: 'academia', n: 'Academia', i: '🏋️', e: '+10% nos treinos de academia e menos lesões', cat: 'treino', base: 45000 },
+  { k: 'futmesa', n: 'Futmesa', i: '🏓', e: 'Área de lazer: +12% de recuperação de energia', cat: 'lazer', base: 25000 },
+  { k: 'areia', n: 'Quadra de areia', i: '🏐', e: 'Área de lazer: +12% de recuperação e moral', cat: 'lazer', base: 55000 },
+  { k: 'piscina', n: 'Piscina & Hidro', i: '🏊', e: 'Área de lazer: +15% de recuperação de energia', cat: 'lazer', base: 95000 },
+  { k: 'refeitorio', n: 'Refeitório', i: '🍽️', e: 'Comida recupera +15% de energia', cat: 'estrutura', base: 65000 },
+  { k: 'dm', n: 'Depto. Médico (DM)', i: '🏥', e: 'Menos lesões e recuperação mais rápida', cat: 'estrutura', base: 110000 },
+  { k: 'base', n: 'Categorias de Base', i: '🌱', e: 'Revela jovens promessas para subir ou vender', cat: 'estrutura', base: 150000 }];
+const facCost = (f, lvl, i) => Math.round((f.base || 40000) * 2.3 ** lvl * cMul(i));
+const MERCH = [
+  { k: 'copo', n: 'Copo do Clube', i: '🥤', price: 45, unlock: 0 },
+  { k: 'camisa', n: 'Camisa Oficial', i: '👕', price: 220, unlock: 25000 },
+  { k: 'uniforme', n: 'Uniforme Completo', i: '🩳', price: 380, unlock: 75000 },
+  { k: 'tenis', n: 'Tênis / Chuteira', i: '👟', price: 540, unlock: 180000 },
+  { k: 'bone', n: 'Boné & Agasalho', i: '🧢', price: 720, unlock: 400000 }];
+const COMMERCE = [
+  { k: 'foodtruck', n: 'Praça de Food Trucks', i: '🍔', base: 30000, g: 2.2, ips: 35, e: 'Lanches na entrada do estádio (2× em dia de jogo)' },
+  { k: 'socio', n: 'Guichê Sócio-Torcedor', i: '🎫', base: 85000, g: 2.4, ips: 95, e: 'Assinaturas mensais da torcida' },
+  { k: 'museu', n: 'Museu de Troféus', i: '🏆', base: 180000, g: 2.5, ips: 180, e: 'Tour pago pelas taças do clube (bônus por título)' }];
+const commPrice = (cm, lvl, i) => Math.round(cm.base * cm.g ** lvl * cMul(i));
 const TRAINS = [
   { k: 'aerobico', n: 'Aeróbico', i: '🏃', xp: 0.8, en: 8, fac: 'pista', d: 'Leve, cansa pouco' },
   { k: 'tecnico', n: 'Técnico', i: '⚽', xp: 1, en: 12, fac: 'campo', d: 'Pode melhorar a finta' },
@@ -199,8 +213,30 @@ const genName = () => { const r = Math.random(); return r < 0.18 ? pick(NICK) : 
 // ============================ ESTADO ============================
 const SAVE_KEY = 'magnatafc_v2';
 let S;
-function defState() { return { v: 2, money: START_MONEY, earned: 0, lastSave: Date.now(), clubs: [], char: { suit: '#1f2937', tie: '#b91c1c', skin: '#e5b48f', hair: '#2e1d14', shades: true, lv: 0 }, reports: [], missions: null, tut: {}, nextId: 1, px: -22, pz: 8, zoom: 2 }; }
-function load() { try { const raw = localStorage.getItem(SAVE_KEY); if (raw) { S = Object.assign(defState(), JSON.parse(raw)); return true; } } catch (e) { } S = defState(); return false; }
+function defState() { return { v: 3, money: START_MONEY, earned: 0, lastSave: Date.now(), clubs: [], royalties: [], merch: { copo: 1, camisa: 0, uniforme: 0, tenis: 0, bone: 0 }, comm: { foodtruck: 0, socio: 0, museu: 0 }, char: { suit: '#1f2937', tie: '#b91c1c', skin: '#e5b48f', hair: '#2e1d14', shades: true, lv: 0 }, reports: [], missions: null, tut: {}, nextId: 1, px: -22, pz: 8, zoom: 2 }; }
+function load() {
+  try {
+    const raw = localStorage.getItem(SAVE_KEY);
+    if (raw) {
+      const def = defState();
+      S = Object.assign(def, JSON.parse(raw));
+      S.merch = Object.assign(def.merch, S.merch || {});
+      S.comm = Object.assign(def.comm, S.comm || {});
+      S.royalties = S.royalties || [];
+      S.clubs = (S.clubs || []).slice(0, MAX_CLUBS).map(c => {
+        const fac = Object.fromEntries(FAC.map(f => [f.k, 0]));
+        if (c.fac) {
+          for (const k of Object.keys(fac)) if (c.fac[k]) fac[k] = c.fac[k];
+          if (c.fac.descanso && !fac.futmesa) fac.futmesa = c.fac.descanso;
+          if (c.fac.massagem && !fac.dm) fac.dm = c.fac.massagem;
+        }
+        return Object.assign({ baseT: 0, baseCand: null }, c, { fac });
+      });
+      return true;
+    }
+  } catch (e) { }
+  S = defState(); return false;
+}
 function save() { if (window.__noSave) return; S.lastSave = Date.now(); if (player) { S.px = player.x; S.pz = player.z; } try { localStorage.setItem(SAVE_KEY, JSON.stringify(S)); } catch (e) { } }
 const hadSave = load();
 for (const c of S.clubs) if (['toMatch', 'match', 'post', 'back', 'train'].includes(c.state)) { c.state = 'rest'; }
@@ -214,7 +250,7 @@ function newSeason(div) {
   return { teams, round: 0, table: teams.map(t => ({ id: t.id, p: 0, j: 0, v: 0, e: 0, d: 0, gp: 0, gc: 0 })) };
 }
 function newClub(d) {
-  return { name: d.name, abbr: d.abbr, crest: { ...d.crest }, kit: { ...d.kit }, squad: [], staff: Object.fromEntries(STAFF.map(s => [s.k, 0])), eq: { bola: { lvl: 0.5, stock: 100 }, uni: { lvl: 0.5, stock: 100 } }, pantry: { comida: 10, agua: 10, iso: 0, supl: 0 }, fac: Object.fromEntries(FAC.map(f => [f.k, 0])), fans: Object.fromEntries(FANS.map(f => [f.k, 0])), energy: 100, state: 'rest', stT: 0, trainType: 'tecnico', needTrain: false, auto: { train: true, match: true }, scouts: [], scoutPct: 0.25, scoutBudget: 0, earned: 0, prizes: 0, div: 0, seasonNo: 1, season: newSeason(0), titles: [], last: [], gymBuff: 0 };
+  return { name: d.name, abbr: d.abbr, crest: { ...d.crest }, kit: { ...d.kit }, squad: [], staff: Object.fromEntries(STAFF.map(s => [s.k, 0])), eq: { bola: { lvl: 0.5, stock: 100 }, uni: { lvl: 0.5, stock: 100 } }, pantry: { comida: 10, agua: 10, iso: 0, supl: 0 }, fac: Object.fromEntries(FAC.map(f => [f.k, 0])), fans: Object.fromEntries(FANS.map(f => [f.k, 0])), energy: 100, state: 'rest', stT: 0, trainType: 'tecnico', needTrain: false, auto: { train: true, match: true }, scouts: [], scoutPct: 0.25, scoutBudget: 0, earned: 0, prizes: 0, div: 0, seasonNo: 1, season: newSeason(0), titles: [], last: [], gymBuff: 0, baseT: 0, baseCand: null };
 }
 
 // runtime
@@ -248,11 +284,42 @@ function teamPower(i) {
   if (c.pantry.iso >= 1) p += 0.15; if (c.pantry.agua < 1) p -= 0.3; for (const m of EQUIP) if (c.eq[m.k].stock < 20) p -= 0.25;
   return p * (0.7 + 0.3 * c.energy / 100);
 }
-function regen(c) { let r = (0.9 + 0.25 * c.staff.massagista) * (1 + 0.15 * c.fac.descanso + 0.1 * c.fac.massagem); if (c.pantry.comida >= 1) r *= 1.3 * (1 + 0.1 * c.fac.refeitorio); return r; }
+function regen(c) {
+  const leisure = 1 + 0.12 * (c.fac.futmesa || 0) + 0.12 * (c.fac.areia || 0) + 0.15 * (c.fac.piscina || 0) + 0.08 * (c.fac.dm || 0);
+  let r = (0.9 + 0.25 * c.staff.massagista) * leisure;
+  if (c.pantry.comida >= 1) r *= 1.3 * (1 + 0.15 * (c.fac.refeitorio || 0));
+  return r;
+}
 function addMoney(v, i) { S.money += v; S.earned += v; if (i != null && S.clubs[i]) S.clubs[i].earned += v; emit('earn', v); }
 function spend(v) { if (S.money < v) { toast('💸 Dinheiro insuficiente'); return false; } S.money -= v; return true; }
 function report(i, t) { S.reports.unshift({ t: Date.now(), c: i, txt: t }); S.reports.length = Math.min(S.reports.length, 50); }
-const totalIps = () => S.clubs.reduce((s, c, i) => s + sponsorIps(i) * (c.scouts.length ? 1 - c.scoutPct : 1), 0);
+const anyMatchDay = () => S.clubs.some(c => ['toMatch', 'match', 'post'].includes(c.state));
+const commIps = () => {
+  const md = anyMatchDay() ? 2 : 1, tit = titlesN();
+  let ips = 0;
+  for (const cm of COMMERCE) {
+    const lv = S.comm[cm.k] || 0; if (!lv) continue;
+    let v = cm.ips * (2 ** (lv - 1));
+    if (cm.k === 'foodtruck') v *= md;
+    if (cm.k === 'museu') v *= (1 + 0.25 * tit);
+    if (cm.k === 'socio') v *= (1 + 0.15 * S.clubs.reduce((a, c) => a + c.fans.torcida, 0));
+    ips += v;
+  }
+  return ips;
+};
+const royaltyIps = () => (S.royalties || []).reduce((s, r) => s + r.ips, 0);
+const clubTotalIps = i => {
+  const c = S.clubs[i]; if (!c) return 0;
+  return sponsorIps(i) * (c.scouts.length ? 1 - c.scoutPct : 1);
+};
+const clubSaleValue = i => {
+  const c = S.clubs[i]; if (!c) return 0;
+  const facSum = FAC.reduce((s, f) => s + (c.fac[f.k] || 0), 0);
+  const sqSum = c.squad.reduce((s, p) => s + playerPrice(p.stars), 0);
+  return Math.round(clubPrice(i) * 0.65 + sqSum * 0.55 + facSum * 25000 + c.titles.length * 150000);
+};
+const isClubZeroed = c => !!c && FAC.every(f => (c.fac[f.k] || 0) >= 1) && c.squad.length >= SQUAD && c.squad.every(p => p.stars >= 5);
+const totalIps = () => S.clubs.reduce((s, c, i) => s + clubTotalIps(i), 0) + commIps() + royaltyIps();
 
 // ============================ MISSÕES ============================
 const MPOOL = [
@@ -427,11 +494,11 @@ function animP(p, mode, dt) {
 function setBubble(p, emoji, dur = 2.6) { if (p.bubble) { p.root.remove(p.bubble); p.bubble = null; } if (!emoji) return; p.bubble = bubbleSprite(emoji); p.bubble.position.y = 2.3; p.root.add(p.bubble); p.bubbleT = dur; }
 function tickBubble(p, dt) { if (p.bubble && p.bubbleT > 0) { p.bubbleT -= dt; if (p.bubbleT <= 0) setBubble(p, null); } }
 
-// ============================ MUNDO / CIDADE ============================
+// ============================ MUNDO / MEGA CT ============================
 const world = new THREE.Group(); scene.add(world);
 const OBST_HUB = [], tapTargets = [], pads = [];
 let OBST = [];
-const HUB = { office: { x: -27, z: -4, w: 8, d: 6, h: 5 }, shop: { x: -17, z: -3, w: 7, d: 5.5, h: 3.8 }, market: { x: -9.5, z: -2, w: 7, d: 5.5, h: 3.4 } };
+const HUB = { office: { x: -27, z: -4, w: 8, d: 6, h: 5 }, shop: { x: -17, z: -3, w: 7, d: 5.5, h: 3.8 }, boulevard: { x: -9.5, z: -2, w: 7, d: 5.5, h: 3.2 } };
 function addHubObst(o) { OBST_HUB.push({ x0: o.x - o.w / 2, x1: o.x + o.w / 2, z0: o.z - o.d / 2, z1: o.z + o.d / 2 }); }
 const winDay = canvasTex(256, 256, (x) => { noise(x, 256, 256, '#d8d3c7', ['#cfc9bc', '#e0dbcf'], 600, 2); for (let i = 0; i < 4; i++) for (let j = 0; j < 4; j++) { x.fillStyle = Math.random() < 0.15 ? '#ffe3a0' : pick(['#3f5a73', '#466480', '#37506a']); x.fillRect(i * 64 + 14, j * 64 + 12, 36, 38); x.fillStyle = 'rgba(255,255,255,.25)'; x.fillRect(i * 64 + 14, j * 64 + 12, 36, 5); } }, [1, 1]);
 const bMats = new Map();
@@ -488,31 +555,36 @@ function hubBuilding(o, col, sign, type, border) {
   const s = textSprite([sign], { h: 0.85, border }); s.position.set(o.x, o.h + 1.4, o.z + o.d / 2); world.add(s);
   addHubObst(o); const hb = add(world, G.box(o.w, o.h, o.d), hitMat, o.x, o.h / 2, o.z); hb.visible = false; hb.userData.tap = { type, pr: 1 }; tapTargets.push(hb);
 }
-let shopShirt, hubFlags = [], shellG = null;
+let shopShirt, hubFlags = [], shellG = null, hubDecorG = null;
 function buildShell() {
   if (shellG) world.remove(shellG);
   shellG = new THREE.Group(); world.add(shellG);
   const n = clamp(S.clubs.length + 1, 1, MAX_CLUBS);
   const x0 = -34, x1 = unitX(n - 1) + 27 * unitScale() + 2, z0 = -20, z1 = 35;
   const w = x1 - x0, d = z1 - z0, cx = (x0 + x1) / 2, cz = (z0 + z1) / 2;
-  flat(shellG, w, d, texMat(T.concrete, w / 7, d / 7, 0.95), cx, 0, cz);
+  // Gramado unificado do Mega CT + alamedas pavimentadas
+  flat(shellG, w, d, M('#3f6e34', 0.98), cx, 0, cz);
+  flat(shellG, 28, 18, texMat(T.pave, 6, 4, 0.95), -19, 0.01, 2);
+  flat(shellG, w - 4, 4.5, texMat(T.pave, 10, 1, 0.95), cx, 0.012, 8.5);
   const edge = M('#facc15', 0.6);
   add(shellG, G.box(w, 0.05, 0.25), edge, cx, 0.03, z0 + 0.15); add(shellG, G.box(w, 0.05, 0.25), edge, cx, 0.03, z1 - 0.15);
   add(shellG, G.box(0.25, 0.05, d), edge, x0 + 0.15, 0.03, cz); add(shellG, G.box(0.25, 0.05, d), edge, x1 - 0.15, 0.03, cz);
-  const wallM = M('#3f4650', 0.9);
-  add(shellG, G.box(w + 1.2, 5, 0.6), wallM, cx, 2.5, z0 - 0.3, true);
-  add(shellG, G.box(0.6, 5, d), wallM, x0 - 0.3, 2.5, cz, true);
-  add(shellG, G.box(0.6, 5, d), wallM, x1 + 0.3, 2.5, cz, true);
+  const wallM = M('#2d3a2f', 0.9);
+  add(shellG, G.box(w + 1.2, 4.5, 0.6), wallM, cx, 2.25, z0 - 0.3, true);
+  add(shellG, G.box(0.6, 4.5, d), wallM, x0 - 0.3, 2.25, cz, true);
+  add(shellG, G.box(0.6, 4.5, d), wallM, x1 + 0.3, 2.25, cz, true);
+  // Paisagismo esportivo do Complexo
+  for (const [tx, tz] of [[-31.5, -13], [-21, -13], [-12, -13], [-31.5, 16], [-31.5, 28], [-22, 26]]) palmTree(shellG, tx, tz, 0.9);
+  for (const [bx, bz] of [[-23, 2.5], [-13.5, 2.5], [-6, 2.5], [-29, 8]]) bush(shellG, bx, bz, 0.85);
 }
 function buildWorld() {
   buildShell();
-  hubBuilding(HUB.office, '#9aa5b1', '🏢 ESCRITÓRIO', 'office', '#38bdf8');
-  hubBuilding(HUB.shop, '#c4b9a8', '👕 LOJA DO CLUBE', 'shop', '#facc15');
-  hubBuilding(HUB.market, '#d9c8a9', '🛒 MERCADINHO', 'market', '#22c55e');
-  const aw = canvasTex(64, 16, (x) => { for (let k = 0; k < 8; k++) { x.fillStyle = k % 2 ? '#fff' : '#16a34a'; x.fillRect(k * 8, 0, 8, 16); } });
-  const awn = add(world, G.box(HUB.market.w, 0.12, 1.4), new THREE.MeshStandardMaterial({ map: aw, roughness: 0.8 }), HUB.market.x, 2.5, HUB.market.z + HUB.market.d / 2 + 0.6, true); awn.rotation.x = 0.28;
+  hubBuilding(HUB.office, '#8c99a6', '🏢 PRESIDÊNCIA', 'office', '#38bdf8');
+  hubBuilding(HUB.shop, '#c4b9a8', '👕 LOJA OFICIAL', 'shop', '#facc15');
+  hubBuilding(HUB.boulevard, '#b8c4cf', '🛍️ ALAMEDA DO ESTÁDIO', 'boulevard', '#22c55e');
   const sw = HUB.shop; add(world, G.box(2.6, 1.6, 0.1), M('#bfe3f2', 0.1, 0.2), sw.x - 1.6, 1.3, sw.z + sw.d / 2 + 0.03);
   shopShirt = new THREE.Group(); shopShirt.position.set(sw.x, sw.h + 1.1, sw.z); world.add(shopShirt);
+  hubDecorG = new THREE.Group(); world.add(hubDecorG);
 }
 function refreshHubDecor() {
   buildShell();
@@ -520,7 +592,14 @@ function refreshHubDecor() {
   shopShirt.clear(); const k = c0 ? c0.kit : { c1: '#ffffff', c2: '#16a34a', pat: 'gola' };
   const mat = shirtMaterial(k); add(shopShirt, G.box(1.5, 1.6, 0.3), mat, 0, 0, 0, true); for (const sx of [-1, 1]) { const sl = add(shopShirt, G.box(0.65, 0.48, 0.3), mat, sx * 0.95, 0.45, 0, true); sl.rotation.z = sx * -0.5; }
   hubFlags.forEach(f => world.remove(f)); hubFlags = [];
-  if (c0) { const ban = canvasTex(512, 96, (x) => { drawKit(x, 512, 96, { ...c0.kit, pat: 'liso' }); x.fillStyle = c0.kit.c2; x.font = '900 54px Arial Black,Arial'; x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillText('VAMOS ' + c0.abbr + '!', 256, 50); }); const g = new THREE.Group(); world.add(g); add(g, G.plane(10, 1.4), new THREE.MeshStandardMaterial({ map: ban }), -14, 3, -19.65); hubFlags.push(g); }
+  if (c0) { const ban = canvasTex(512, 96, (x) => { drawKit(x, 512, 96, { ...c0.kit, pat: 'liso' }); x.fillStyle = c0.kit.c2; x.font = '900 54px Arial Black,Arial'; x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillText('COMPLEXO ' + c0.abbr, 256, 50); }); const g = new THREE.Group(); world.add(g); add(g, G.plane(10, 1.4), new THREE.MeshStandardMaterial({ map: ban }), -14, 3, -19.65); hubFlags.push(g); }
+  if (hubDecorG) {
+    hubDecorG.clear();
+    const bx = HUB.boulevard.x, bz = HUB.boulevard.z + HUB.boulevard.d / 2 + 1.4;
+    if (S.comm.foodtruck > 0) kiosk(hubDecorG, bx - 3.2, bz + 2.5, '🍔 FOOD TRUCK', '#f97316');
+    if (S.comm.socio > 0) kiosk(hubDecorG, bx, bz + 2.5, '🎫 SÓCIO', '#38bdf8');
+    if (S.comm.museu > 0) kiosk(hubDecorG, bx + 3.2, bz + 2.5, '🏆 MUSEU', '#facc15');
+  }
 }
 
 // ============================ UNIDADE DO CLUBE (ESTÁDIO + CT) ============================
@@ -596,52 +675,104 @@ function buildCT(i, g, R) {
   for (let z = 16.5; z <= 37; z += 1.5) { add(cg, G.box(0.06, 1.1, 0.06), M('#64748b', 0.5, 0.5), 12.5, 0.55, z); if (z < 24 || z > 28) add(cg, G.box(0.06, 1.1, 0.06), M('#64748b', 0.5, 0.5), -10.5, 0.55, z); }
   const fenceM = new THREE.MeshStandardMaterial({ color: '#1f5130', transparent: true, opacity: 0.75, side: THREE.DoubleSide });
   add(cg, G.box(23, 0.9, 0.04), fenceM, 1, 0.55, 37); add(cg, G.box(0.04, 0.9, 20.5), fenceM, 12.5, 0.55, 26.7); add(cg, G.box(0.04, 0.9, 7.5), fenceM, -10.5, 0.55, 20.2); add(cg, G.box(0.04, 0.9, 9), fenceM, -10.5, 0.55, 32.5);
-  // campo de treino
+  const lockPlot = (x, z, w, d, label) => { flat(cg, w, d, M('#6c7a58', 0.95), x, 0.022, z); const s = textSprite([label], { h: 0.36, border: '#94a3b8' }); s.position.set(x, 0.85, z); cg.add(s); };
+  // campo de treino principal (sempre presente)
   flat(cg, 9, 6.5, new THREE.MeshStandardMaterial({ map: miniTex }), -5, 0.025, 20.5);
-  const cones = []; for (let k = 0; k < 4 + L.campo; k++) { const x = -8.5 + (k % 5) * 1.6, z = 19 + Math.floor(k / 5) * 2.5; add(cg, G.cone(0.12, 0.3, 8), M('#f97316', 0.6), x, 0.15, z); cones.push({ x, z }); }
+  const cones = []; for (let k = 0; k < 4 + (L.campo || 0); k++) { const x = -8.5 + (k % 5) * 1.6, z = 19 + Math.floor(k / 5) * 2.5; add(cg, G.cone(0.12, 0.3, 8), M('#f97316', 0.6), x, 0.15, z); cones.push({ x, z }); }
   for (const s of [-1, 1]) { const gx = -5 + s * 4.3; add(cg, G.box(0.06, 0.6, 1.6), M('#fff'), gx, 0.3, 20.5); }
-  // finalização
-  flat(cg, 5.5, 5, M('#3f8a3a', 1), 3.5, 0.025, 20.5); for (const x of [2.2, 4.8]) add(cg, G.cyl(0.05, 0.05, 1, 6), M('#fff'), x, 0.5, 18.4); const cb = add(cg, G.cyl(0.05, 0.05, 2.6, 6), M('#fff'), 3.5, 1, 18.4); cb.rotation.z = Math.PI / 2; add(cg, G.box(2.6, 1, 0.5), new THREE.MeshStandardMaterial({ color: '#fff', transparent: true, opacity: 0.3, depthWrite: false }), 3.5, 0.5, 18.1);
-  for (let k = 0; k < 6; k++) add(cg, G.sph(0.1, 10, 8), M('#fff', 0.4), 2.5 + k * 0.35, 0.1, 22.6);
-  // pista
-  const track = new THREE.Mesh(new THREE.RingGeometry(2.4, 3.3, 40), new THREE.MeshStandardMaterial({ map: T.track, roughness: 0.9 })); track.rotation.x = -Math.PI / 2; track.scale.set(1, 1.45, 1); track.position.set(9, 0.03, 22); track.receiveShadow = true; cg.add(track);
-  // academia
-  flat(cg, 7, 5, new THREE.MeshStandardMaterial({ map: T.rubber, roughness: 0.9 }), -6.2, 0.03, 29.5);
-  for (const [x, z] of [[-9.6, 27.1], [-2.8, 27.1], [-9.6, 31.9], [-2.8, 31.9]]) add(cg, G.cyl(0.08, 0.08, 2.6, 6), M('#64748b', 0.4, 0.6), x, 1.3, z, true);
-  add(cg, G.box(7.2, 0.08, 5.2), new THREE.MeshStandardMaterial({ color: '#e2e8f0', transparent: true, opacity: 0.25, depthWrite: false }), -6.2, 2.62, 29.5);
-  const gym = []; for (let k = 0; k < 4 + L.academia; k++) { const x = -8.8 + (k % 4) * 1.75, z = 28 + Math.floor(k / 4) * 2.2; if (k % 2) { add(cg, G.box(0.6, 0.35, 1.2), M('#111827', 0.5), x, 0.18, z, true); add(cg, G.box(0.5, 0.08, 1.2), M('#334155'), x, 0.4, z); } else { add(cg, G.box(0.25, 0.5, 1.2), M('#1f2937', 0.5), x, 0.25, z, true); add(cg, G.cyl(0.03, 0.03, 1.4, 6), M('#cbd5e1', 0.3, 0.8), x, 1.0, z).rotation.x = Math.PI / 2; } gym.push({ x: x + 0.6, z }); }
-  // refeitório
-  flat(cg, 5.5, 5, texMat(T.pave, 1.4, 1.2), 0.8, 0.03, 29.5);
-  const seats = []; for (let k = 0; k < 2 + Math.ceil(L.refeitorio / 2); k++) { const z = 27.8 + k * 1.5; add(cg, G.box(3.4, 0.08, 0.7), texMat(T.wood, 1, 1), 0.8, 0.72, z, true); for (const s of [-1, 1]) { add(cg, G.box(3.4, 0.06, 0.28), M('#78350f', 0.8), 0.8, 0.42, z + s * 0.55); for (let q = 0; q < 3; q++) seats.push({ x: -0.3 + q * 1.1, z: z + s * 0.55, rot: s > 0 ? Math.PI : 0 }); } }
-  add(cg, G.box(4.5, 1, 0.6), M('#e7e5e4'), 0.8, 0.5, 32.3, true);
-  // descanso + piscina
-  flat(cg, 8, 5, M('#e7d7b8', 0.9), 8.3, 0.03, 29.5);
-  const pool = flat(cg, 3.6, 2.2, new THREE.MeshStandardMaterial({ color: '#38bdf8', roughness: 0.1, metalness: 0.1 }), 10.2, 0.05, 28.6); add(cg, G.box(3.9, 0.12, 2.5), M('#f5f5f4'), 10.2, 0.02, 28.6);
-  const loung = []; for (let k = 0; k < 4 + L.descanso; k++) { const x = 5.3 + (k % 5) * 1.0, z = 30.6 + Math.floor(k / 5) * 1.6; add(cg, G.box(0.55, 0.25, 1.4), M('#f8fafc', 0.6), x, 0.22, z); loung.push({ x, z: z - 0.7, rot: 0 }); }
-  // massagem
-  const mass = []; for (let k = 0; k < 2 + L.massagem; k++) { const x = 5.4 + k * 1.4; add(cg, G.box(0.6, 0.55, 1.6), M('#e2e8f0', 0.6), x, 0.36, 34.6, true); mass.push({ x, z: 33.9, rot: 0 }); }
+  // finalização / base sub-20
+  if (L.base > 0) {
+    flat(cg, 5.5, 5, M('#3f8a3a', 1), 3.5, 0.025, 20.5); for (const x of [2.2, 4.8]) add(cg, G.cyl(0.05, 0.05, 1, 6), M('#fff'), x, 0.5, 18.4); const cb = add(cg, G.cyl(0.05, 0.05, 2.6, 6), M('#fff'), 3.5, 1, 18.4); cb.rotation.z = Math.PI / 2; add(cg, G.box(2.6, 1, 0.5), new THREE.MeshStandardMaterial({ color: '#fff', transparent: true, opacity: 0.3, depthWrite: false }), 3.5, 0.5, 18.1);
+    for (let k = 0; k < 6; k++) add(cg, G.sph(0.1, 10, 8), M('#fff', 0.4), 2.5 + k * 0.35, 0.1, 22.6);
+  } else lockPlot(3.5, 20.5, 5.2, 4.6, '🔒 Base Sub-20');
+  // pista aeróbica (paga)
+  if (L.pista > 0) {
+    const track = new THREE.Mesh(new THREE.RingGeometry(2.4, 3.3, 40), new THREE.MeshStandardMaterial({ map: T.track, roughness: 0.9 })); track.rotation.x = -Math.PI / 2; track.scale.set(1, 1.45, 1); track.position.set(9, 0.03, 22); track.receiveShadow = true; cg.add(track);
+  } else lockPlot(9, 22, 4.4, 5.2, '🔒 Pista');
+  // academia (paga)
+  const gym = [];
+  if (L.academia > 0) {
+    flat(cg, 7, 5, new THREE.MeshStandardMaterial({ map: T.rubber, roughness: 0.9 }), -6.2, 0.03, 29.5);
+    for (const [x, z] of [[-9.6, 27.1], [-2.8, 27.1], [-9.6, 31.9], [-2.8, 31.9]]) add(cg, G.cyl(0.08, 0.08, 2.6, 6), M('#64748b', 0.4, 0.6), x, 1.3, z, true);
+    add(cg, G.box(7.2, 0.08, 5.2), new THREE.MeshStandardMaterial({ color: '#e2e8f0', transparent: true, opacity: 0.25, depthWrite: false }), -6.2, 2.62, 29.5);
+    for (let k = 0; k < 4 + L.academia; k++) { const x = -8.8 + (k % 4) * 1.75, z = 28 + Math.floor(k / 4) * 2.2; if (k % 2) { add(cg, G.box(0.6, 0.35, 1.2), M('#111827', 0.5), x, 0.18, z, true); add(cg, G.box(0.5, 0.08, 1.2), M('#334155'), x, 0.4, z); } else { add(cg, G.box(0.25, 0.5, 1.2), M('#1f2937', 0.5), x, 0.25, z, true); add(cg, G.cyl(0.03, 0.03, 1.4, 6), M('#cbd5e1', 0.3, 0.8), x, 1.0, z).rotation.x = Math.PI / 2; } gym.push({ x: x + 0.6, z }); }
+  } else lockPlot(-6.2, 29.5, 6.8, 4.8, '🔒 Academia');
+  // refeitório (pago)
+  const seats = [];
+  if (L.refeitorio > 0) {
+    flat(cg, 5.5, 5, texMat(T.pave, 1.4, 1.2), 0.8, 0.03, 29.5);
+    for (let k = 0; k < 2 + Math.ceil(L.refeitorio / 2); k++) { const z = 27.8 + k * 1.5; add(cg, G.box(3.4, 0.08, 0.7), texMat(T.wood, 1, 1), 0.8, 0.72, z, true); for (const s of [-1, 1]) { add(cg, G.box(3.4, 0.06, 0.28), M('#78350f', 0.8), 0.8, 0.42, z + s * 0.55); for (let q = 0; q < 3; q++) seats.push({ x: -0.3 + q * 1.1, z: z + s * 0.55, rot: s > 0 ? Math.PI : 0 }); } }
+    add(cg, G.box(4.5, 1, 0.6), M('#e7e5e4'), 0.8, 0.5, 32.3, true);
+  } else lockPlot(0.8, 29.5, 5.2, 4.8, '🔒 Refeitório');
+  // áreas de lazer (futmesa, quadra de areia, piscina)
+  const leisure = [];
+  if (L.futmesa > 0) {
+    flat(cg, 3.2, 2.6, texMat(T.pave, 1, 1), 5.6, 0.03, 28.2);
+    add(cg, G.box(1.5, 0.08, 0.9), M('#1d4ed8', 0.4), 5.6, 0.72, 28.2, true);
+    add(cg, G.box(0.06, 0.14, 0.9), M('#f8fafc'), 5.6, 0.82, 28.2);
+    leisure.push({ x: 4.5, z: 28.2, rot: Math.PI / 2, m: 'idle' }, { x: 6.7, z: 28.2, rot: -Math.PI / 2, m: 'idle' });
+  } else lockPlot(5.6, 28.2, 3.0, 2.4, '🔒 Futmesa');
+  if (L.areia > 0) {
+    flat(cg, 4.2, 3.2, M('#e6c98a', 0.95), 5.8, 0.03, 31.6);
+    for (const sx of [-1.8, 1.8]) add(cg, G.cyl(0.04, 0.04, 1.4, 6), M('#f8fafc'), 5.8 + sx, 0.7, 31.6);
+    add(cg, G.box(3.6, 0.45, 0.04), new THREE.MeshStandardMaterial({ color: '#ffffff', transparent: true, opacity: 0.45 }), 5.8, 1.1, 31.6);
+    leisure.push({ x: 4.8, z: 30.8, rot: 0, m: 'idle' }, { x: 6.8, z: 32.3, rot: Math.PI, m: 'idle' });
+  } else lockPlot(5.8, 31.6, 4.0, 3.0, '🔒 Areia');
+  if (L.piscina > 0) {
+    flat(cg, 4.2, 3.2, M('#e7d7b8', 0.9), 10.2, 0.03, 29.0);
+    flat(cg, 3.6, 2.2, new THREE.MeshStandardMaterial({ color: '#38bdf8', roughness: 0.1, metalness: 0.1 }), 10.2, 0.05, 28.6);
+    add(cg, G.box(3.9, 0.12, 2.5), M('#f5f5f4'), 10.2, 0.02, 28.6);
+    for (let k = 0; k < 3; k++) { const lx = 9.0 + k * 1.1; add(cg, G.box(0.55, 0.25, 1.3), M('#f8fafc', 0.6), lx, 0.22, 30.4); leisure.push({ x: lx, z: 29.8, rot: 0, m: 'lie' }); }
+  } else lockPlot(10.2, 29.0, 4.0, 3.0, '🔒 Piscina');
+  // Departamento Médico (DM)
+  const dm = [];
+  if (L.dm > 0) {
+    building(cg, 7.2, 35.0, 4.6, 3.2, 2.5, '#f1f5f9');
+    const s = textSprite(['🏥 DM'], { h: 0.42, border: '#ef4444' }); s.position.set(7.2, 3.4, 36.6); cg.add(s);
+    for (let k = 0; k < 2 + Math.min(2, L.dm); k++) { const mx = 5.4 + k * 1.2; add(cg, G.box(0.6, 0.55, 1.5), M('#e2e8f0', 0.6), mx, 0.36, 33.4, true); dm.push({ x: mx, z: 32.8, rot: 0, m: 'lie' }); }
+  } else lockPlot(7.2, 34.5, 4.4, 3.0, '🔒 DM');
   // prédio do CT
   building(cg, -6.2, 35.2, 6.5, 4, 3, '#cfd5da');
   const sign = textSprite(['CT ' + c.name.toUpperCase()], { h: 0.55, border: c.kit.c1 === '#111827' ? '#facc15' : c.kit.c1 }); sign.position.set(-6.2, 4.3, 37.3); cg.add(sign);
-  const idle = []; for (let k = 0; k < 26; k++) idle.push({ x: -2 + (k % 6) * 0.9, z: 34.5 + Math.floor(k / 6) * 0.6 });
-  R.spots = { cones, gym, seats, loung, mass, idle };
+  const idle = []; for (let k = 0; k < 26; k++) idle.push({ x: -2 + (k % 6) * 0.9, z: 34.2 + Math.floor(k / 6) * 0.6 });
+  R.spots = { cones, gym, seats, leisure, dm, idle };
   const hb = add(cg, G.box(23, 3, 21), hitMat, 1, 1.5, 26.5); hb.visible = false; hb.userData.tap = { type: 'ct', i, pr: 0 }; tapTargets.push(hb);
 }
 function crowdBuild(i) {
   const R = RT[i], c = S.clubs[i]; if (R.crowdG) R.g.remove(R.crowdG);
   const cg = new THREE.Group(); R.g.add(cg); R.crowdG = cg;
   const spots = [];
-  for (let k = 0; k < 4; k++) for (let z = -12.3; z <= 12.3; z += 0.5) spots.push([9.0 + 1.2 * k, 0.6 + 0.6 * k, z, k]);
-  for (let k = 0; k < 4; k++) for (let x = -8.4; x <= 8.4; x += 0.5) spots.push([x, 0.6 + 0.6 * k, -12.9 - 1.2 * k, k + 4]);
-  for (let x = -5.6; x <= 5.6; x += 0.5) spots.push([x, 0.5, 12.9, 8]);
-  const fill = Math.min(1, 0.1 + 0.09 * c.fans.torcida + 0.05 * c.div), chosen = spots.filter(() => Math.random() < fill);
+  for (let k = 0; k < 4; k++) for (let z = -12.3; z <= 12.3; z += 0.65) spots.push([9.0 + 1.2 * k, 0.6 + 0.6 * k, z, k, -Math.PI / 2]);
+  for (let k = 0; k < 4; k++) for (let x = -8.4; x <= 8.4; x += 0.65) spots.push([x, 0.6 + 0.6 * k, -12.9 - 1.2 * k, k + 4, 0]);
+  for (let x = -5.6; x <= 5.6; x += 0.65) spots.push([x, 0.5, 12.9, 8, Math.PI]);
+  const fill = Math.min(1, 0.14 + 0.085 * c.fans.torcida + 0.05 * c.div), chosen = spots.filter(() => Math.random() < fill);
   R.crowd = [];
   for (let h = 0; h < 2; h++) {
-    const list = chosen.filter((_, k) => k % 2 === h), bodies = new THREE.InstancedMesh(G.cap(0.12, 0.22), M('#ffffff', 0.8), Math.max(1, list.length)), heads = new THREE.InstancedMesh(G.sph(0.085, 8, 6), M('#ffffff', 0.7), Math.max(1, list.length));
-    const m4 = new THREE.Matrix4(), col = new THREE.Color(), base = [];
-    list.forEach((s, n) => { const jx = rnd(-0.06, 0.06); m4.makeTranslation(s[0] + jx, s[1] + 0.25, s[2]); bodies.setMatrixAt(n, m4); m4.makeTranslation(s[0] + jx, s[1] + 0.55, s[2]); heads.setMatrixAt(n, m4); col.set(pick([c.kit.c1, c.kit.c1, c.kit.c2, c.kit.c1, '#f1f5f9'])); bodies.setColorAt(n, col); base.push(col.clone()); col.set(pick(SKINS)); heads.setColorAt(n, col); });
-    bodies.count = heads.count = list.length; bodies.instanceMatrix.needsUpdate = heads.instanceMatrix.needsUpdate = true; if (bodies.instanceColor) bodies.instanceColor.needsUpdate = true; if (heads.instanceColor) heads.instanceColor.needsUpdate = true;
-    const grp = new THREE.Group(); grp.add(bodies); grp.add(heads); cg.add(grp); R.crowd.push({ grp, bodies, list, base });
+    const list = chosen.filter((_, k) => k % 2 === h), cnt = Math.max(1, list.length);
+    const torsos = new THREE.InstancedMesh(G.cap(0.14, 0.12), M('#ffffff', 0.78), cnt);
+    const heads = new THREE.InstancedMesh(G.sph(0.16, 10, 8), M('#ffffff', 0.75), cnt);
+    const hairs = new THREE.InstancedMesh(G.hemi(0.168), M('#ffffff', 0.92), cnt);
+    const armsL = new THREE.InstancedMesh(G.cap(0.045, 0.1), M('#ffffff', 0.78), cnt);
+    const armsR = new THREE.InstancedMesh(G.cap(0.045, 0.1), M('#ffffff', 0.78), cnt);
+    const m4 = new THREE.Matrix4(), q = new THREE.Quaternion(), e = new THREE.Euler(), sc = new THREE.Vector3(1, 1, 1), col = new THREE.Color(), base = [];
+    list.forEach((s, n) => {
+      const jx = rnd(-0.08, 0.08), x = s[0] + jx, y = s[1], z = s[2], rot = s[4];
+      q.setFromEuler(e.set(0, rot, 0));
+      m4.compose(new THREE.Vector3(x, y + 0.28, z), q, sc); torsos.setMatrixAt(n, m4);
+      m4.compose(new THREE.Vector3(x, y + 0.56, z), q, sc); heads.setMatrixAt(n, m4);
+      q.setFromEuler(e.set(-0.35, rot, 0));
+      m4.compose(new THREE.Vector3(x, y + 0.58, z), q, sc); hairs.setMatrixAt(n, m4);
+      const ax = Math.cos(rot) * 0.18, az = -Math.sin(rot) * 0.18;
+      q.setFromEuler(e.set(0, rot, 0.25)); m4.compose(new THREE.Vector3(x - ax, y + 0.3, z - az), q, sc); armsL.setMatrixAt(n, m4);
+      q.setFromEuler(e.set(0, rot, -0.25)); m4.compose(new THREE.Vector3(x + ax, y + 0.3, z + az), q, sc); armsR.setMatrixAt(n, m4);
+      col.set(pick([c.kit.c1, c.kit.c1, c.kit.c2, c.kit.c1, '#f8fafc']));
+      torsos.setColorAt(n, col); armsL.setColorAt(n, col); armsR.setColorAt(n, col); base.push(col.clone());
+      col.set(pick(SKINS)); heads.setColorAt(n, col);
+      col.set(pick(HAIRS)); hairs.setColorAt(n, col);
+    });
+    for (const im of [torsos, heads, hairs, armsL, armsR]) { im.count = list.length; im.instanceMatrix.needsUpdate = true; if (im.instanceColor) im.instanceColor.needsUpdate = true; }
+    const grp = new THREE.Group(); grp.add(torsos, heads, hairs, armsL, armsR); cg.add(grp);
+    R.crowd.push({ grp, bodies: torsos, list, base });
   }
   // bandeiras na torcida
   const fl = [0, 6, 14, 24][c.fans.bandeiras], fm = new THREE.MeshStandardMaterial({ map: flagTex(c), side: THREE.DoubleSide, roughness: 0.8 });
@@ -652,6 +783,7 @@ function crowdBuild(i) {
   for (let k = 0; k < c.fans.bandeirao; k++) { const [x, y, z, side] = spotsB[k], b = new THREE.Mesh(BIG_G[k % 2], bt); b.position.set(x, y, z); if (side === 'e') { b.rotation.set(0, -Math.PI / 2, 0); b.rotateX(-0.45); } else { b.rotateX(-1.1); } cg.add(b); }
   // mosaico
   R.mosaic = c.fans.mosaico ? R.crowd.map(cr => cr.list.map(s => { const lv = c.fans.mosaico; const on = lv === 1 ? s[3] % 2 === 0 : lv === 2 ? Math.floor((s[3] < 4 ? s[2] : s[0]) / 2.5) % 2 === 0 : (Math.floor((s[3] < 4 ? s[2] : s[0]) / 2) + s[3]) % 2 === 0; return new THREE.Color(on ? c.kit.c1 : c.kit.c2); })) : null;
+  cg.visible = ['toMatch', 'match', 'post'].includes(c.state);
 }
 function setMosaic(i, on) { const R = RT[i]; if (!R.crowd || !R.mosaic) return; R.crowd.forEach((cr, h) => { cr.list.forEach((_, n) => cr.bodies.setColorAt(n, on ? R.mosaic[h][n] : cr.base[n])); if (cr.bodies.instanceColor) cr.bodies.instanceColor.needsUpdate = true; }); }
 
@@ -722,17 +854,32 @@ function assignSpots(i, quiet) {
   const R = RT[i], c = S.clubs[i]; if (!R || !R.pc) return; const lu = getLU(i), sp = R.spots, list = c.squad.map(p => R.pc.get(p.id)).filter(Boolean);
   const via = (ct, pts) => atCT(ct) ? pts : [TUNNEL, CT_GATE, ...pts];
   if (c.state === 'rest' || c.state === 'back') {
-    const pool = [...sp.loung.map(s => ({ ...s, m: 'lie' })), ...sp.seats.map(s => ({ ...s, m: 'sit' }))]; if (c.staff.massagista) pool.unshift(...sp.mass.map(s => ({ ...s, m: 'lie' })));
-    list.forEach((ct, k) => { const s = pool[k] || { ...sp.idle[k % sp.idle.length], m: 'idle', rot: rnd(0, 6) }; const inj = c.squad.find(p => p.id === ct.pid).inj; goTo(ct, via(ct, [s]), s.m, s.rot || 0); if (inj) setBubble(ct.p, '🤕', 6); });
+    const pool = [...sp.leisure, ...sp.seats.map(s => ({ ...s, m: 'sit' }))];
+    list.forEach((ct, k) => {
+      const pl = c.squad.find(p => p.id === ct.pid);
+      const inj = pl && pl.inj;
+      const s = inj && sp.dm.length ? sp.dm[k % sp.dm.length] : (pool.length && k < pool.length * 2 ? pool[k % pool.length] : { ...sp.idle[k % sp.idle.length], m: 'idle', rot: rnd(0, 6) });
+      ct.strollT = rnd(4, 11);
+      goTo(ct, via(ct, [s]), s.m || 'idle', s.rot || 0);
+      if (inj) setBubble(ct.p, '🤕', 6);
+    });
   } else if (c.state === 'train') {
     const t = c.trainType;
-    list.forEach((ct, k) => { ct.trainK = k; let s; if (t === 'academia') s = sp.gym[k % sp.gym.length]; else if (t === 'tecnico') s = sp.cones[k % sp.cones.length]; else if (t === 'finalizacao') s = { x: 2.2 + (k % 6) * 0.45, z: 23.2 + Math.floor(k / 6) * 0.5 }; else s = { x: 9, z: 22 }; goTo(ct, via(ct, [{ x: s.x + rnd(-0.2, 0.2), z: s.z + rnd(-0.2, 0.2) }]), t === 'academia' ? 'pump' : 'idle', Math.PI, true); });
+    const trPts = sp.cones.length ? sp.cones : [{ x: -5, z: 20.5 }];
+    list.forEach((ct, k) => {
+      ct.trainK = k; let s;
+      if (t === 'academia' && sp.gym.length) s = sp.gym[k % sp.gym.length];
+      else if (t === 'tecnico') s = trPts[k % trPts.length];
+      else if (t === 'finalizacao') s = { x: -7 + (k % 6) * 0.9, z: 20 + Math.floor(k / 6) * 0.7 };
+      else s = sp.gym.length && t === 'academia' ? sp.gym[0] : { x: 9, z: 22 };
+      goTo(ct, via(ct, [{ x: s.x + rnd(-0.2, 0.2), z: s.z + rnd(-0.2, 0.2) }]), t === 'academia' && sp.gym.length ? 'pump' : 'idle', Math.PI, true);
+    });
   } else if (c.state === 'toMatch' || c.state === 'match' || c.state === 'post') {
     lu.xi.forEach((pl, k) => { if (!pl) return; const ct = R.pc.get(pl.id); ct.k = k; const b = basePos(0, k); goTo(ct, atCT(ct) ? [CT_GATE, TUNNEL, b] : [b], 'idle', Math.PI, true); });
     lu.bench.forEach((pl, k) => { const ct = R.pc.get(pl.id); ct.k = -1; const s = { x: -9.0, z: -5.6 + k * 0.8 }; goTo(ct, atCT(ct) ? [CT_GATE, TUNNEL, { x: -8.4, z: s.z }, s] : [s], 'sit', Math.PI / 2); });
   }
   // comissão
-  const pos = { treinador: c.state === 'match' || c.state === 'toMatch' || c.state === 'post' ? { x: -8.2, z: 0.3, m: 'idle', r: Math.PI / 2 } : { x: -3, z: 24, m: 'idle', r: Math.PI }, auxiliar: { x: -1.5, z: 21, m: 'idle', r: -Math.PI / 2 }, preparador: { x: 6, z: 22, m: 'idle', r: Math.PI / 2 }, massagista: { x: 5.4, z: 35.6, m: 'idle', r: Math.PI }, medico: { x: 7.5, z: 35.6, m: 'idle', r: Math.PI }, nutri: { x: 0.8, z: 33, m: 'idle', r: Math.PI }, roupeiro: { x: -3.2, z: 34, m: 'idle', r: 0 }, gandula: c.state === 'match' || c.state === 'toMatch' ? { x: 1.6, z: -12.3, m: 'idle', r: 0 } : { x: 1.5, z: 18, m: 'idle', r: 0 } };
+  const pos = { treinador: c.state === 'match' || c.state === 'toMatch' || c.state === 'post' ? { x: -8.2, z: 0.3, m: 'idle', r: Math.PI / 2 } : { x: -3, z: 24, m: 'idle', r: Math.PI }, auxiliar: { x: -1.5, z: 21, m: 'idle', r: -Math.PI / 2 }, preparador: c.state === 'train' ? { x: -1.2, z: 20.5, m: 'idle', r: -Math.PI / 2 } : { x: 4, z: 25, m: 'idle', r: Math.PI }, massagista: { x: 5.4, z: 33.8, m: 'idle', r: Math.PI }, medico: { x: 7.2, z: 32.8, m: 'idle', r: Math.PI }, nutri: { x: 0.8, z: 32.5, m: 'idle', r: Math.PI }, roupeiro: { x: -3.2, z: 34, m: 'idle', r: 0 }, gandula: c.state === 'match' || c.state === 'toMatch' ? { x: 1.6, z: -12.3, m: 'idle', r: 0 } : { x: 1.5, z: 18, m: 'idle', r: 0 } };
   for (const st of STAFF) { const sp2 = R.staffP[st.k]; if (!sp2) continue; const p = pos[st.k]; goTo(sp2, atCT(sp2) === (p.z > 15.2) ? [p] : atCT(sp2) ? [CT_GATE, TUNNEL, p] : [TUNNEL, CT_GATE, p], p.m, p.r); }
 }
 function stepCtrl(ct, dt, speed) {
@@ -752,10 +899,18 @@ function updWalkers(i, dt) {
       else if (t === 'finalizacao') { mode = 'kick'; ct.rot = Math.PI; }
       else mode = 'pump';
     }
+    if (!moving && c.state === 'rest' && atCT(ct)) {
+      ct.strollT = (ct.strollT || 0) - dt;
+      if (ct.strollT <= 0) {
+        ct.strollT = rnd(6, 13);
+        const sp = R.spots, pool = [...sp.leisure, ...sp.seats.map(s => ({ ...s, m: 'sit' })), ...sp.idle.slice(0, 8).map(s => ({ ...s, m: 'idle' }))];
+        if (pool.length) { const nxt = pick(pool); goTo(ct, [{ x: nxt.x + rnd(-0.25, 0.25), z: nxt.z + rnd(-0.25, 0.25) }], nxt.m || 'idle', nxt.rot || rnd(0, 6), false); }
+      }
+    }
     if (!moving && !ct.wp.length && c.state !== 'train') ct.rot = lerpAngle(ct.rot, ct.endRot, Math.min(1, dt * 4));
     ct.p.root.position.set(ct.x, mode === 'lie' ? 0.04 : 0, ct.z); ct.p.root.rotation.y = ct.rot; animP(ct.p, mode, dt); tickBubble(ct.p, dt);
   }
-  for (const st of STAFF) { const s = R.staffP[st.k]; if (!s) continue; const mv = stepCtrl(s, dt, 2.2); if (!mv) s.rot = lerpAngle(s.rot, s.endRot || 0, Math.min(1, dt * 4)); s.p.root.position.set(s.x, 0, s.z); s.p.root.rotation.y = s.rot; animP(s.p, mv ? 'walk' : st.k === 'treinador' && c.state === 'match' ? 'cheer' : 'idle', dt); if (st.k === 'treinador' && !mv && c.state === 'match') { s.p.arms[1].rotation.z = 0; s.p.body.position.y = 0; } }
+  for (const st of STAFF) { const s = R.staffP[st.k]; if (!s) continue; const mv = stepCtrl(s, dt, 2.2); if (!mv) s.rot = lerpAngle(s.rot, s.endRot || 0, Math.min(1, dt * 4)); s.p.root.position.set(s.x, 0, s.z); s.p.root.rotation.y = s.rot; animP(s.p, mv ? 'walk' : st.k === 'treinador' && c.state === 'match' ? 'cheer' : 'idle', dt); tickBubble(s.p, dt); if (st.k === 'treinador' && !mv && c.state === 'match') { s.p.arms[1].rotation.z = 0; s.p.body.position.y = 0; } }
 }
 
 // ============================ CICLO DO CLUBE ============================
@@ -769,6 +924,7 @@ function startMatch(i, auto) {
   if (!['rest', 'train'].includes(c.state)) { if (!auto) toast('O time já está em campo'); return; }
   consume(c, 'match'); c.energy = Math.max(0, c.energy - 22 * Math.max(0.5, 1 - 0.06 * c.staff.preparador));
   c.state = 'toMatch'; c.stT = 7; S.tut.firstMatch = true; const R = RT[i]; R.opp = currentOpp(c); R.sh = R.sa = 0; R.minute = 0; R.oppShirt.color.set(R.opp.color);
+  if (R.crowdG) R.crowdG.visible = true;
   for (const ct of R.away) { ct.x = TUNNEL.x + rnd(-0.5, 0.5); ct.z = TUNNEL.z - 1 + rnd(-0.5, 0.5); ct.p.root.visible = true; const b = basePos(1, ct.k); ct.wp = [b]; }
   assignSpots(i); drawScore(i); if (!auto) { toast(`⚽ ${c.name} vai a campo contra ${R.opp.name}!`); closePanel(); }
 }
@@ -777,6 +933,7 @@ function startTraining(i, type, auto) {
   if (c.state !== 'rest') { if (!auto) toast(c.state === 'train' ? 'O elenco já está treinando' : 'O time está em jogo'); return; }
   const tr = TRAINS.find(t => t.k === type); consume(c, 'train'); c.energy = Math.max(0, c.energy - tr.en * Math.max(0.5, 1 - 0.06 * c.staff.preparador));
   c.state = 'train'; c.stT = TRAIN_SEC; c.trainType = type; c.needTrain = false; S.tut.trained = true; assignSpots(i);
+  const prep = RT[i] && RT[i].staffP && RT[i].staffP.preparador; if (prep) setBubble(prep.p, '📣', 4.5);
   if (!auto) { toast(`${tr.i} Treino ${tr.n.toLowerCase()} começou!`); closePanel(); }
 }
 function finishTraining(i) {
@@ -795,7 +952,12 @@ function clubTick(i, dt) {
   if (c.state === 'train') { c.stT -= dt; if (c.stT <= 0) finishTraining(i); }
   if (c.state === 'toMatch') { c.stT -= dt; if (c.stT <= 0) { c.state = 'match'; matchStart(i); } }
   if (c.state === 'post') { c.stT -= dt; if (c.stT <= 0) { c.state = 'back'; c.stT = 9; for (const ct of R.away) ct.p.root.visible = false; assignSpots(i); drawScore(i); } }
-  if (c.state === 'back') { c.stT -= dt; if (c.stT <= 0) { c.state = 'rest'; assignSpots(i); drawScore(i); } }
+  if (c.state === 'back') { c.stT -= dt; if (c.stT <= 0) { c.state = 'rest'; if (R.crowdG) R.crowdG.visible = false; assignSpots(i); drawScore(i); } }
+  if (c.fac.base > 0 && !c.baseCand) {
+    c.baseT = (c.baseT || 0) + dt;
+    const need = 90 / (1 + 0.25 * (c.fac.base - 1));
+    if (c.baseT >= need) { c.baseT = 0; const s = Math.min(4.5, 1 + 0.5 * c.fac.base); c.baseCand = genPlayer(pick(Object.keys(POS_NEED)), s); toast(`🌱 Base do ${c.name} revelou ${c.baseCand.name} (${c.baseCand.pos} ${fmtS(s)})!`); }
+  }
   if (c.state === 'rest' && lu.full) {
     if (c.staff.auxiliar && c.auto.train && c.needTrain && c.energy >= 30) startTraining(i, c.trainType, true);
     else if (c.staff.treinador && c.auto.match && c.energy >= 55) startMatch(i, true);
@@ -827,7 +989,7 @@ function endMatch(i) {
   c.last.unshift(`${res} ${R.sh}x${R.sa} ${R.opp.name}`); c.last.length = Math.min(c.last.length, 6);
   const w = toW(i, 0, 0); floatAt(w.x, 3, w.z, `${res === 'V' ? '🏆 Vitória' : res === 'E' ? '🤝 Empate' : '😞 Derrota'} +${fmt(ticket + prize)}`);
   for (const p of c.squad) if (p.inj > 0) p.inj--;
-  const injP = Math.max(0.01, 0.12 - 0.02 * c.staff.medico - 0.01 * c.fac.massagem - 0.01 * c.fac.academia - (c.gymBuff ? 0.04 : 0)); c.gymBuff = 0;
+  const injP = Math.max(0.01, 0.12 - 0.02 * c.staff.medico - 0.015 * (c.fac.dm || 0) - 0.01 * (c.fac.academia || 0) - (c.gymBuff ? 0.04 : 0)); c.gymBuff = 0;
   if (Math.random() < injP) { const v = getLU(i).xi.filter(Boolean); if (v.length) { const p = pick(v); p.inj = 2; report(i, `🤕 ${p.name} se machucou e fica fora por 2 jogos.`); } }
   c.needTrain = true; markDirty(i); s.round++; if (s.round >= ROUNDS) seasonEnd(i);
   c.state = 'post'; c.stT = 4; R.phase = 'post'; R.hold = null; R.bt = null; R.ball.visible = false; drawScore(i);
@@ -949,22 +1111,39 @@ function updScouts(dt) {
   }));
   for (const [key, v] of scoutVis) if (!seen.has(key)) { world.remove(v.root); scoutVis.delete(key); }
 }
-let fanT = 8;
+let fanT = 6, merchT = 3.5;
 function spawnFanMarch() {
-  if (!S.clubs.length) return; const i = ri(0, S.clubs.length - 1), c = S.clubs[i], dest = toW(i, -13, 2);
-  const n = ri(10, 16), fm = new THREE.MeshStandardMaterial({ map: flagTex(c), side: THREE.DoubleSide }), sm = M(c.kit.c1, 0.75);
+  const active = S.clubs.map((c, i) => ({ c, i })).filter(x => ['toMatch', 'match'].includes(x.c.state));
+  if (!active.length) return;
+  const { c, i } = pick(active), dest = toW(i, -13, 3.5);
+  const n = ri(8, 14), fm = new THREE.MeshStandardMaterial({ map: flagTex(c), side: THREE.DoubleSide }), sm = M(c.kit.c1, 0.75);
   for (let k = 0; k < n; k++) {
     const p = makePerson({ shirt: Math.random() < 0.7 ? sm : M(c.kit.c2, 0.75), pants: M(pick(['#1e3a8a', '#1f2937', '#334155', '#7c2d12']), 0.9), skin: pick(SKINS), hair: pick(HAIRS), cap: Math.random() < 0.25 ? c.kit.c2 : null }); p.root.scale.setScalar(0.92);
     if (k % 3 === 0) { const f = new THREE.Group(); f.position.set(0.25, 1.4, 0); add(f, G.cyl(0.02, 0.02, 1.8, 5), M('#d4d4d4'), 0, 0.6, 0); const fl = new THREE.Mesh(FLAG_G[k % 2], fm); fl.position.set(0, 1.25, 0); fl.rotation.y = Math.PI / 2; f.add(fl); p.root.add(f); p.arms[1].rotation.z = -2.6; }
-    world.add(p.root); const ox = rnd(-1.5, 1.5), oz = rnd(-1.2, 1.2);
-    fans.push({ p, path: [[-32 + ox, 27 + oz], [-22 + ox, 17 + oz], [-6 + ox, 7 + oz], [dest.x + ox * 0.5, dest.z + oz * 0.5]], u: -k * 0.012, dur: 26 + rnd(-2, 2), flag: k % 3 === 0 });
+    world.add(p.root); const ox = rnd(-1.2, 1.2), oz = rnd(-0.8, 0.8);
+    // Torcida caminha apenas pela Alameda do Estádio (nunca entra no CT!)
+    fans.push({ p, path: [[-31 + ox, 8.5 + oz], [-17 + ox, 8.5 + oz], [-9 + ox, 8.0 + oz], [dest.x + ox * 0.4, dest.z + oz * 0.4]], u: -k * 0.015, dur: 18 + rnd(-2, 2), flag: k % 3 === 0 });
     if (k === 2) setBubble(p, pick(['🎶', '📣', '⚽', '🔥']), 6);
   }
-  toast(`📣 A torcida do ${c.name} está chegando!`);
 }
 function updFans(dt) {
-  fanT -= dt; if (fanT <= 0) { fanT = rnd(35, 55); if (fans.length < 20) spawnFanMarch(); }
+  fanT -= dt; if (fanT <= 0) { fanT = rnd(14, 22); if (fans.length < 18) spawnFanMarch(); }
   for (let k = fans.length - 1; k >= 0; k--) { const f = fans[k]; f.u += dt / f.dur; if (f.u >= 1) { world.remove(f.p.root); fans.splice(k, 1); continue; } if (f.u < 0) { f.p.root.visible = false; continue; } f.p.root.visible = true; const pp = pathAt(f.path, f.u); f.p.root.position.set(pp.x, 0, pp.z); f.p.root.rotation.y = pp.rot; animP(f.p, 'walk', dt); if (f.flag) f.p.arms[1].rotation.set(0, 0, -2.6); tickBubble(f.p, dt); }
+}
+function updMerchSales(dt) {
+  if (!S.clubs.length) return;
+  const md = anyMatchDay() ? 2.2 : 1;
+  merchT -= dt * md;
+  if (merchT > 0) return;
+  const unlocked = MERCH.filter(m => (S.merch[m.k] || 0) > 0);
+  if (!unlocked.length) { merchT = 4; return; }
+  const item = pick(unlocked), lv = S.merch[item.k] || 1;
+  const avgStars = S.clubs.reduce((s, c, i) => s + getLU(i).avg, 0) / S.clubs.length;
+  const fanBonus = 1 + 0.1 * S.clubs.reduce((s, c) => s + c.fans.torcida, 0);
+  const val = Math.round(item.price * lv * (1 + 0.25 * avgStars) * fanBonus * (anyMatchDay() ? 1.5 : 1));
+  addMoney(val, 0);
+  floatAt(HUB.shop.x + rnd(-1.2, 1.2), 3.6, HUB.shop.z + 1.5, `+${fmt(val)} ${item.i}`);
+  merchT = rnd(3.2, 5.5);
 }
 function updComplaints(i, dt) {
   const R = RT[i], c = S.clubs[i]; R.cplT -= dt; if (R.cplT > 0) return; R.cplT = rnd(4, 7);
@@ -981,8 +1160,8 @@ const EVOS = [
   { n: 'Investidor', i: '⌚', d: 'Gravata de seda e relógio de ouro.', cost: 1.5e6, req: [['Fundar o 1º clube', () => S.clubs.length >= 1]] },
   { n: 'Cartola', i: '🎩', d: 'Ganha a cartola dos dirigentes de verdade.', cost: 15e6, req: [['Ter um elenco completo (26) em algum clube', () => S.clubs.some(c => c.squad.length >= SQUAD)]] },
   { n: 'Magnata', i: '🧥', d: 'Capa dourada e aura de campeão.', cost: 150e6, req: [['Conquistar 1 título de campeonato', () => titlesN() >= 1]] },
-  { n: 'Barão do Futebol', i: '👑', d: 'Coroa de ouro e brilho no chão.', cost: 2e9, req: [['Ter 3 clubes', () => S.clubs.length >= 3], ['Comissão com média 3★ em algum clube', () => S.clubs.some(c => staffAvg(c) >= 3)]] },
-  { n: 'Lenda Eterna', i: '🌟', d: 'O maior magnata da história do futebol.', cost: 50e9, req: [['Ter 5 clubes', () => S.clubs.length >= 5], ['Conquistar 3 títulos', () => titlesN() >= 3]] },
+  { n: 'Barão do Futebol', i: '👑', d: 'Coroa de ouro e brilho no chão.', cost: 2e9, req: [['Ter 2 clubes', () => S.clubs.length >= 2], ['Comissão com média 3★ em algum clube', () => S.clubs.some(c => staffAvg(c) >= 3)]] },
+  { n: 'Lenda Eterna', i: '🌟', d: 'O maior magnata da história do futebol.', cost: 50e9, req: [['Ter 3 clubes', () => S.clubs.length >= 3], ['Conquistar 3 títulos', () => titlesN() >= 3]] },
 ];
 const evoLv = () => Math.min(EVOS.length - 1, S.char.lv || 0);
 const evoReady = () => { const n = EVOS[evoLv() + 1]; return !!n && n.req.every(r => r[1]()); };
@@ -1082,7 +1261,7 @@ function tutStep() {
   const ct = toW(0, -13, 26), st = toW(0, -13, 4);
   if (!S.tut.firstMatch) return { t: '👉 Vá ao CT ou ao estádio e mande o time jogar', ...ct };
   if (!S.tut.trained && c.state === 'rest') return { t: '👉 No CT, mande o elenco treinar para evoluir', ...ct };
-  if (!S.tut.market && S.money > 20000) return { t: '👉 Passe no mercadinho e compre isotônicos', x: HUB.market.x, z: HUB.market.z + HUB.market.d / 2 + 1.6 };
+  if (!S.tut.market && S.money > 25000) return { t: '👉 Passe na Loja Oficial ou na Alameda do Estádio', x: HUB.shop.x, z: HUB.shop.z + HUB.shop.d / 2 + 1.8 };
   return null;
 }
 
@@ -1094,7 +1273,7 @@ let toastT = null; function toast(m) { const t = $('toast'); t.textContent = m; 
 
 // ============================ UI ============================
 const UI = { p: null, tab: null, club: 0, draft: null, p2: null };
-const DEF_TAB = { office: 'elenco', stadium: 'partida', ct: 'treino', shop: 'visual' };
+const DEF_TAB = { office: 'elenco', stadium: 'partida', ct: 'treino', shop: 'produtos' };
 function openPanel(p, o = {}) { UI.p = p; UI.tab = o.tab || DEF_TAB[p] || null; if (o.club != null) UI.club = o.club; if (UI.club >= S.clubs.length) UI.club = 0; if (p === 'shop') UI.draft = null; if (p === 'market') S.tut.market = true; joyEnd(); render(false); $('M').classList.add('open'); }
 function closePanel() { $('M').classList.remove('open'); UI.p = null; close2(); }
 function render(keep = true) { if (!UI.p) return; const b = $('Mb'), st = b.scrollTop; b.innerHTML = PANELS[UI.p](); b.scrollTop = keep ? st : 0; }
@@ -1111,8 +1290,8 @@ const energyBar = c => `<div class="kv"><span>⚡ Energia do elenco</span><b>${M
 
 function pOffice() {
   const i = UI.club, c = S.clubs[i];
-  if (!c) return head('🏢 Escritório') + `<div class="sub">Você ainda não tem clube. Vá até o terreno à venda (seta amarela) e funde o seu primeiro clube.</div>`;
-  let h = head('🏢 Escritório · ' + esc(c.name)) + clubChips() + tabs([['elenco', '👥 Elenco'], ['comissao', '🧠 Comissão'], ['olheiros', '🔎 Olheiros'], ['relatorios', '📋 Relatórios']]);
+  if (!c) return head('🏢 Presidência') + `<div class="sub">Você ainda não tem clube. Vá até o terreno à venda (seta amarela) e funde o seu primeiro clube.</div>`;
+  let h = head('🏢 Presidência · ' + esc(c.name)) + clubChips() + tabs([['elenco', '👥 Elenco'], ['comissao', '🧠 Comissão'], ['olheiros', '🔎 Olheiros'], ['negocios', '💼 Clubes'], ['relatorios', '📋 Relatórios']]);
   if (UI.tab === 'elenco') {
     const lu = getLU(i), cnt = pos => c.squad.filter(p => p.pos === pos).length;
     h += `<div class="row"><div class="grow"><div class="nm">${c.squad.length}/${SQUAD} jogadores</div><div class="sub">Média dos titulares: ${fmtS(Math.round(lu.avg * 2) / 2)} · ${lu.bench.length}/15 no banco · a barra azul é a evolução nos treinos</div></div></div>`;
@@ -1133,6 +1312,19 @@ function pOffice() {
     c.scouts.forEach((sc, k) => { h += `<div class="row"><div style="font-size:24px">🔎</div><div class="grow"><div class="nm">${esc(sc.name)}</div>${starsHTML(sc.stars)}<div class="sub">Busca até ${fmtS(Math.min(5, sc.stars + 1))} · ${Math.round(scoutDur(sc))}s por viagem</div><div class="bar"><i style="width:${Math.round(sc.prog * 100)}%"></i></div>${sc.note ? `<div class="sub" style="margin-top:4px">💬 ${esc(sc.note)}</div>` : ''}</div>${sc.stars < 5 ? btn('Evoluir<br>' + fmt(upCost(SCOUT_BASE, sc.stars)), 'scoutUp', upCost(SCOUT_BASE, sc.stars), `data-k="${k}"`, 'blue') : ''}</div>`; });
     if (c.scouts.length < MAX_SCOUTS) h += btn(`🔎 Contratar olheiro · ${fmt(scoutPrice(0.5))}`, 'scoutHire', scoutPrice(0.5), '', 'big');
   }
+  if (UI.tab === 'negocios') {
+    const zeroed = isClubZeroed(c), facDone = FAC.filter(f => (c.fac[f.k] || 0) >= 1).length, fiveCount = c.squad.filter(p => p.stars >= 5).length;
+    const saleVal = clubSaleValue(i), royalVal = Math.round(saleVal * 0.65), royalIps = Math.round(clubTotalIps(i) * 0.2);
+    h += `<div class="sec">Império de Clubes (${S.clubs.length}/${MAX_CLUBS})</div>`;
+    h += `<div class="row"><div class="grow"><div class="nm">Zerar ${esc(c.name)}</div><div class="sub ${facDone >= FAC.length ? 'ok' : ''}">• Estruturas do CT construídas: ${facDone}/${FAC.length}</div><div class="sub ${fiveCount >= SQUAD ? 'ok' : ''}">• Elenco completo 5★: ${fiveCount}/${SQUAD}</div></div></div>`;
+    h += nextClubHTML();
+    h += `<div class="sec">Vender ${esc(c.name)}</div><div class="sub" style="margin-bottom:8px">Escolha como negociar o clube para liberar uma vaga ou lucrar:</div>`;
+    h += `<div class="row"><div class="grow"><div class="nm">💵 Venda Total (100%)</div><div class="sub">Recebe o valor cheio na hora e encerra o vínculo.</div></div>${btn('Vender<br>' + fmt(saleVal), 'sellClub', null, `data-mode="full"`, 'gold')}</div>`;
+    h += `<div class="row"><div class="grow"><div class="nm">🤝 Venda + 20% dos Ganhos</div><div class="sub">Recebe ${fmt(royalVal)} agora + ${fmt(royalIps)}/s vitalício!</div></div>${btn('Negociar<br>' + fmt(royalVal), 'sellClub', null, `data-mode="royalty"`, 'blue')}</div>`;
+    if (S.royalties && S.royalties.length) {
+      h += `<div class="sec">Participações (20% de clubes vendidos)</div>` + S.royalties.map(r => `<div class="kv"><span>🤝 ${esc(r.name)}</span><b>+${fmt(r.ips)}/s</b></div>`).join('');
+    }
+  }
   if (UI.tab === 'relatorios') { const list = S.reports.filter(r => r.c === i); h += list.length ? list.map(r => `<div class="row"><div class="grow"><div class="sub">${new Date(r.t).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}</div><div style="font-size:13px;font-weight:700">${esc(r.txt)}</div></div></div>`).join('') : '<div class="sub">Relatórios de olheiros, treinos, lesões e temporadas aparecem aqui.</div>'; }
   return h;
 }
@@ -1147,8 +1339,21 @@ function pCT() {
     h += `<div class="row"><div style="font-size:22px">📋</div><div class="grow"><div class="nm">Auxiliar técnico</div><div class="sub">${c.staff.auxiliar ? 'Treina o elenco sozinho depois de cada jogo, usando o último treino escolhido.' : 'Contrate no escritório para os treinos ficarem automáticos.'}</div></div>${c.staff.auxiliar ? `<button class="chip ${c.auto.train ? 'on' : ''}" data-act="autoT">${c.auto.train ? 'Ligado' : 'Desligado'}</button>` : ''}</div>`;
     h += `<div class="row"><div style="font-size:22px">🧠</div><div class="grow"><div class="nm">Treinador</div><div class="sub">${c.staff.treinador ? 'Leva o time para jogar sozinho quando a energia passa de 55%.' : 'Contrate no escritório para as partidas acontecerem sozinhas.'}</div></div>${c.staff.treinador ? `<button class="chip ${c.auto.match ? 'on' : ''}" data-act="autoM">${c.auto.match ? 'Ligado' : 'Desligado'}</button>` : ''}</div>`;
   }
-  if (UI.tab === 'instalacoes') { h += `<div class="sub" style="margin-bottom:8px">Cada nível melhora o efeito e coloca mais equipamentos no CT.</div>`; for (const f of FAC) { const l = c.fac[f.k]; h += `<div class="row"><div style="font-size:24px">${f.i}</div><div class="grow"><div class="nm">${f.n} · nível ${l}</div><div class="sub">${f.e}</div></div>${l < 5 ? btn('Melhorar<br>' + fmt(facCost(l, i)), 'facUp', facCost(l, i), `data-k="${f.k}"`, 'blue') : '<span class="sub ok">Máximo</span>'}</div>`; } }
-  if (UI.tab === 'despensa') { h += `<div class="sub" style="margin-bottom:8px">Partidas e treinos consomem os itens da despensa. Compre mais no 🛒 mercadinho da praça.</div>` + PANTRY.map(it => `<div class="row"><div style="font-size:24px">${it.i}</div><div class="grow"><div class="nm">${it.n}: ${Math.floor(c.pantry[it.k])} un.</div><div class="sub">${it.d}</div></div></div>`).join('') + `<div class="sub">${c.staff.nutri >= 2 ? '🥗 Seu nutricionista compra sozinho quando o estoque fica baixo.' : '🥗 Com o nutricionista em 2★, as compras ficam automáticas.'}</div>`; }
+  if (UI.tab === 'instalacoes') {
+    h += `<div class="sub" style="margin-bottom:8px">Construa e evolua as áreas do Mega CT. Tudo começa bloqueado e aparece no mapa ao comprar.</div>`;
+    for (const f of FAC) { const l = c.fac[f.k] || 0, cost = facCost(f, l, i); h += `<div class="row"><div style="font-size:24px">${f.i}</div><div class="grow"><div class="nm">${f.n} · ${l ? 'nível ' + l : '🔒 Bloqueado'}</div><div class="sub">${f.e}</div></div>${l < 5 ? btn((l ? 'Melhorar' : 'Construir') + '<br>' + fmt(cost), 'facUp', cost, `data-k="${f.k}"`, l ? 'blue' : 'gold') : '<span class="sub ok">Máximo</span>'}</div>`; }
+    if (c.fac.base > 0) {
+      h += `<div class="sec">🌱 Categorias de Base (Sub-20)</div>`;
+      if (c.baseCand) {
+        const bc = c.baseCand, comm = Math.round(playerPrice(bc.stars) * 0.6);
+        h += `<div class="row" style="border-color:#22c55e"><div class="grow"><div class="nm">${esc(bc.name)} (${bc.pos} · ${fmtS(bc.stars)})</div><div class="sub">Jovem promessa pronta! Suba ao elenco ou venda por comissão.</div></div><div style="display:flex;flex-direction:column;gap:6px">${btn('Subir', 'basePromote', null, '', 'blue')}${btn('Vender ' + fmt(comm), 'baseSell', null, '', 'gold')}</div></div>`;
+      } else {
+        const need = 90 / (1 + 0.25 * (c.fac.base - 1)), pct = Math.min(100, Math.round((c.baseT || 0) / need * 100));
+        h += `<div class="row"><div class="grow"><div class="nm">Formando próximo talento...</div><div class="bar"><i style="width:${pct}%"></i></div></div></div>`;
+      }
+    }
+  }
+  if (UI.tab === 'despensa') { h += `<div class="sub" style="margin-bottom:8px">Partidas e treinos consomem os itens da despensa. Reabasteça direto aqui para o elenco.</div>` + PANTRY.map(it => { const p10 = it.p * cMul(i), p50 = Math.round(p10 * 4.5); return `<div class="row"><div style="font-size:24px">${it.i}</div><div class="grow"><div class="nm">${it.n}: ${Math.floor(c.pantry[it.k])} un.</div><div class="sub">${it.d}</div></div><div style="display:flex;flex-direction:column;gap:6px">${btn('+10 · ' + fmt(p10), 'buyItem', p10, `data-k="${it.k}" data-n="10" data-c="${p10}"`)}${btn('+50 · ' + fmt(p50), 'buyItem', p50, `data-k="${it.k}" data-n="50" data-c="${p50}"`, 'blue')}</div></div>`; }).join('') + `<div class="sub">${c.staff.nutri >= 2 ? '🥗 Seu nutricionista compra sozinho quando o estoque fica baixo.' : '🥗 Com o nutricionista em 2★, as compras ficam automáticas.'}</div>`; }
   return h;
 }
 function pStadium() {
@@ -1175,12 +1380,11 @@ function pStadium() {
   }
   return h;
 }
-function nextReq() { const n = S.clubs.length, prev = S.clubs[n - 1]; if (!prev) return null; return { n, prev, squad: prev.squad.length >= SQUAD, hired: STAFF.every(s => prev.staff[s.k] > 0), avg: staffAvg(prev) >= 3 }; }
-function canBuyNext() { const r = nextReq(); return S.clubs.length === 0 || (r && r.n < MAX_CLUBS && r.squad && r.hired && r.avg); }
+function nextReq() { const n = S.clubs.length, prev = S.clubs[n - 1]; if (!prev) return null; return { n, prev, facDone: FAC.filter(f => (prev.fac[f.k] || 0) >= 1).length, fiveCount: prev.squad.filter(p => p.stars >= 5).length, zeroed: isClubZeroed(prev) }; }
+function canBuyNext() { const r = nextReq(); return S.clubs.length === 0 || (r && r.n < MAX_CLUBS && r.zeroed); }
 function nextClubHTML() {
-  const r = nextReq(); if (!r) return ''; if (r.n >= MAX_CLUBS) return `<div class="sec">Próximo clube</div><div class="sub">Você já tem o máximo de clubes desta versão.</div>`;
-  const ok = r.squad && r.hired && r.avg;
-  return `<div class="sec">Próximo clube</div><div class="row"><div class="grow"><div class="nm">Requisitos no ${esc(r.prev.name)}</div><div class="sub ${r.squad ? 'ok' : 'no'}">${r.squad ? '✔' : '✘'} Elenco completo: ${r.prev.squad.length}/${SQUAD}</div><div class="sub ${r.hired ? 'ok' : 'no'}">${r.hired ? '✔' : '✘'} Comissão técnica completa (8 funções)</div><div class="sub ${r.avg ? 'ok' : 'no'}">${r.avg ? '✔' : '✘'} Média da comissão 3★ ou mais (${fmtS(Math.round(staffAvg(r.prev) * 2) / 2)})</div><div class="sub">Preço do novo clube: ${fmt(clubPrice(r.n))}</div></div>${ok ? btn('Comprar', 'nextClub', clubPrice(r.n), '', 'gold') : ''}</div>`;
+  const r = nextReq(); if (!r) return ''; if (r.n >= MAX_CLUBS) return `<div class="sec">Próximo clube</div><div class="sub">Você já tem o máximo de ${MAX_CLUBS} clubes simultâneos. Venda um clube para abrir vaga!</div>`;
+  return `<div class="sec">Próximo clube</div><div class="row"><div class="grow"><div class="nm">Zerar ${esc(r.prev.name)} para expandir</div><div class="sub ${r.facDone >= FAC.length ? 'ok' : 'no'}">${r.facDone >= FAC.length ? '✔' : '✘'} Todas as áreas do CT construídas: ${r.facDone}/${FAC.length}</div><div class="sub ${r.fiveCount >= SQUAD ? 'ok' : 'no'}">${r.fiveCount >= SQUAD ? '✔' : '✘'} Elenco completo 5★: ${r.fiveCount}/${SQUAD}</div><div class="sub">Preço do novo clube: ${fmt(clubPrice(r.n))}</div></div>${r.zeroed ? btn('Comprar', 'nextClub', clubPrice(r.n), '', 'gold') : ''}</div>`;
 }
 function newDraft() { return { name: '', abbr: '', crest: { shape: 'classico', c1: pick(COLORS.slice(0, 8)), c2: '#ffffff', sym: 'estrela' }, kit: { c1: '#e11d48', c2: '#ffffff', pat: 'listras', shorts: '#ffffff', socks: '#e11d48' } }; }
 function editorHTML(d) {
@@ -1194,17 +1398,29 @@ function editorHTML(d) {
   <div class="sub">Cor principal</div>${sw('kit.c1', d.kit.c1)}<div class="sub">Cor secundária</div>${sw('kit.c2', d.kit.c2)}<div class="sub">Calção</div>${sw('kit.shorts', d.kit.shorts)}<div class="sub">Meião</div>${sw('kit.socks', d.kit.socks)}`;
 }
 function pShop() {
-  if (!S.clubs.length) return head('👕 Loja do clube') + '<div class="sub">Funde um clube para criar o escudo e o uniforme.</div>';
+  if (!S.clubs.length) return head('👕 Loja Oficial') + '<div class="sub">Funde um clube para abrir a Loja Oficial, vender produtos e criar o uniforme.</div>';
   const i = UI.club, c = S.clubs[i];
-  let h = head('👕 Loja do clube') + (S.clubs.length > 1 ? `<div class="sub" style="margin-bottom:4px">Escolha o clube:</div>` + clubChips('shopClub') : '') + tabs([['visual', '🎨 Escudo e uniforme'], ['materiais', '⚽ Bolas e uniformes']]);
+  let h = head('👕 Loja Oficial') + (S.clubs.length > 1 ? `<div class="sub" style="margin-bottom:4px">Escolha o clube:</div>` + clubChips('shopClub') : '') + tabs([['produtos', '🛍️ Produtos'], ['visual', '🎨 Escudo e uniforme'], ['materiais', '⚽ Bolas e uniformes']]);
+  if (UI.tab === 'produtos') {
+    h += `<div class="sub" style="margin-bottom:8px">Torcedores compram os itens desbloqueados aqui na loja. Em Dia de Jogo o movimento e o lucro disparam!</div>`;
+    for (const m of MERCH) {
+      const lv = S.merch[m.k] || 0, cost = lv === 0 ? m.unlock : Math.round((m.unlock || 15000) * 2.2 ** lv);
+      h += `<div class="row"><div style="font-size:24px">${m.i}</div><div class="grow"><div class="nm">${m.n} · ${lv ? 'nível ' + lv : '🔒 Bloqueado'}</div><div class="sub">${lv ? `Venda base: ${fmt(m.price * lv)} por cliente` : 'Desbloqueie para começar a vender na loja'}</div></div>${lv < 5 ? btn((lv ? 'Melhorar' : 'Liberar') + '<br>' + fmt(cost), 'merchUp', cost, `data-k="${m.k}"`, lv ? 'blue' : 'gold') : '<span class="sub ok">Máximo</span>'}</div>`;
+    }
+  }
   if (UI.tab === 'visual') { if (!UI.draft) UI.draft = { name: c.name, abbr: c.abbr, crest: { ...c.crest }, kit: { ...c.kit } }; h += editorHTML(UI.draft) + btn('💾 Salvar visual', 'shopSave', null, '', 'big gold'); }
   if (UI.tab === 'materiais') { h += `<div class="sub" style="margin-bottom:8px">Bolas e uniformes gastam nos treinos e nos jogos. Abaixo de 20% os jogadores reclamam e rendem menos. Qualidade melhor aumenta a força e a renda.</div>`; for (const m of EQUIP) { const mt = c.eq[m.k], cl = mt.stock < 20 ? 'bad' : mt.stock < 45 ? 'warn' : ''; h += `<div class="row"><div style="font-size:24px">${m.i}</div><div class="grow"><div class="nm">${m.n}</div>${starsHTML(mt.lvl)}<div class="bar ${cl}"><i style="width:${Math.round(mt.stock)}%"></i></div><div class="sub">${Math.round(mt.stock)}% em estoque</div></div><div style="display:flex;flex-direction:column;gap:8px">${mt.stock < 99 ? btn('Repor ' + fmt(refillCost(mt, i)), 'refill', refillCost(mt, i), `data-k="${m.k}"`) : ''}${mt.lvl < 5 ? btn('Qualidade ' + fmt(upCost(EQ_BASE, mt.lvl) * cMul(i)), 'eqUp', upCost(EQ_BASE, mt.lvl) * cMul(i), `data-k="${m.k}"`, 'blue') : ''}</div></div>`; } h += `<div class="sub">${c.staff.roupeiro >= 2 ? '🧺 Seu roupeiro repõe sozinho.' : '🧺 Com o roupeiro em 2★, a reposição fica automática.'}</div>`; }
   return h;
 }
-function pMarket() {
-  if (!S.clubs.length) return head('🛒 Mercadinho') + '<div class="sub">Funde um clube primeiro. Aqui você compra comida, água, isotônicos e suplementos para o elenco.</div>';
-  const i = UI.club, c = S.clubs[i];
-  return head('🛒 Mercadinho') + `<div class="sub" style="margin-bottom:6px">Os itens vão direto para a despensa do CT do clube escolhido.</div>` + clubChips() + PANTRY.map(it => { const p10 = it.p * cMul(i), p50 = Math.round(p10 * 4.5); return `<div class="row"><div style="font-size:26px">${it.i}</div><div class="grow"><div class="nm">${it.n}</div><div class="sub">${it.d}</div><div class="sub">No ${esc(c.name)}: <b>${Math.floor(c.pantry[it.k])} un.</b></div></div><div style="display:flex;flex-direction:column;gap:8px">${btn('+10 · ' + fmt(p10), 'buyItem', p10, `data-k="${it.k}" data-n="10" data-c="${p10}"`)}${btn('+50 · ' + fmt(p50), 'buyItem', p50, `data-k="${it.k}" data-n="50" data-c="${p50}"`, 'blue')}</div></div>`; }).join('');
+function pBoulevard() {
+  if (!S.clubs.length) return head('🛍️ Alameda do Estádio') + '<div class="sub">Funde um clube primeiro para liberar os comércios na frente do estádio.</div>';
+  const md = anyMatchDay();
+  let h = head('🛍️ Alameda do Estádio') + `<div class="kv"><span>Renda da Alameda</span><b>+${fmt(commIps())}/s ${md ? '🔥 (Dia de Jogo!)' : ''}</b></div><div class="sub" style="margin-bottom:8px">Comércios exclusivos para a torcida na entrada do estádio.</div>`;
+  for (const cm of COMMERCE) {
+    const lv = S.comm[cm.k] || 0, cost = commPrice(cm, lv, 0);
+    h += `<div class="row"><div style="font-size:26px">${cm.i}</div><div class="grow"><div class="nm">${cm.n} · ${lv ? 'nível ' + lv : '🔒 Bloqueado'}</div><div class="sub">${cm.e}</div></div>${lv < 5 ? btn((lv ? 'Melhorar' : 'Construir') + '<br>' + fmt(cost), 'commUp', cost, `data-k="${cm.k}"`, lv ? 'blue' : 'gold') : '<span class="sub ok">Máximo</span>'}</div>`;
+  }
+  return h;
 }
 function pFound() {
   const d = UI.draft, i = UI.foundIdx, price = clubPrice(i);
@@ -1222,9 +1438,9 @@ function pSettings() {
   return head('⚙️ Ajustes') + `<div class="sec">Instalar no iPhone</div><div class="sub">No Safari, toque em Compartilhar e depois em "Adicionar à Tela de Início".</div>
   <div class="sec">Como jogar</div><div class="sub">Arraste o dedo para andar (no PC: WASD ou setas). Pare nos círculos para entrar no escritório, na loja, no mercadinho, no CT ou no estádio. Toque nos prédios, no estádio ou num jogador para ver detalhes. Use a 🔍 lupa (ou a rodinha do mouse) para o zoom.</div>
   <div class="sec">Ganhos offline</div><div class="sub">Com o jogo fechado, seus clubes faturam ${OFFLINE_RATE * 100}% do normal, por até ${OFFLINE_CAP / 3600} horas. Partidas offline só acontecem se o clube tiver treinador.</div>
-  <div class="sec">Progresso</div><div class="kv"><span>Total faturado</span><b>${fmt(S.earned)}</b></div>${btn(resetArm ? '⚠️ Toque de novo para apagar tudo' : '🗑️ Apagar progresso', 'reset', null, '', 'big dark')}<div class="sub" style="text-align:center;margin-top:10px">Magnata FC · v0.4</div>`;
+  <div class="sec">Progresso</div><div class="kv"><span>Total faturado</span><b>${fmt(S.earned)}</b></div>${btn(resetArm ? '⚠️ Toque de novo para apagar tudo' : '🗑️ Apagar progresso', 'reset', null, '', 'big dark')}<div class="sub" style="text-align:center;margin-top:10px">Magnata FC · v0.5</div>`;
 }
-const PANELS = { office: pOffice, stadium: pStadium, ct: pCT, shop: pShop, market: pMarket, found: pFound, char: pChar, missions: pMissions, settings: pSettings };
+const PANELS = { office: pOffice, stadium: pStadium, ct: pCT, shop: pShop, boulevard: pBoulevard, found: pFound, char: pChar, missions: pMissions, settings: pSettings };
 
 function openCard(i, id) {
   UI.club = i;
@@ -1264,7 +1480,19 @@ const ACT = {
   scoutPct: d => { S.clubs[UI.club].scoutPct = +d.v; render(); },
   train: d => startTraining(UI.club, d.t), play: () => startMatch(UI.club),
   autoT: () => { const c = S.clubs[UI.club]; c.auto.train = !c.auto.train; render(); }, autoM: () => { const c = S.clubs[UI.club]; c.auto.match = !c.auto.match; render(); },
-  facUp: d => { const i = UI.club, c = S.clubs[i], l = c.fac[d.k]; if (l >= 5 || !spend(facCost(l, i))) return; c.fac[d.k] = l + 1; buildUnit(i); rebuildObst(); toast(`🏗️ ${FAC.find(f => f.k === d.k).n} agora no nível ${l + 1}!`); render(); },
+  facUp: d => { const i = UI.club, c = S.clubs[i], f = FAC.find(x => x.k === d.k), l = c.fac[d.k] || 0, cost = facCost(f, l, i); if (!f || l >= 5 || !spend(cost)) return; c.fac[d.k] = l + 1; buildUnit(i); rebuildObst(); toast(`🏗️ ${f.n} agora no nível ${l + 1}!`); render(); },
+  merchUp: d => { const m = MERCH.find(x => x.k === d.k), lv = S.merch[d.k] || 0, cost = lv === 0 ? m.unlock : Math.round((m.unlock || 15000) * 2.2 ** lv); if (!m || lv >= 5 || !spend(cost)) return; S.merch[d.k] = lv + 1; toast(`${m.i} ${m.n} agora no nível ${lv + 1}!`); render(); },
+  commUp: d => { const cm = COMMERCE.find(x => x.k === d.k), lv = S.comm[d.k] || 0, cost = commPrice(cm, lv, 0); if (!cm || lv >= 5 || !spend(cost)) return; S.comm[d.k] = lv + 1; refreshHubDecor(); toast(`${cm.i} ${cm.n} agora no nível ${lv + 1}!`); render(); },
+  basePromote: () => { const i = UI.club, c = S.clubs[i], bc = c.baseCand; if (!bc) return; if (c.squad.length >= SQUAD) { toast('Elenco cheio! Venda um jogador ou venda a promessa.'); return; } c.squad.push(bc); c.baseCand = null; markDirty(i); toast(`🌱 ${bc.name} subiu para o profissional!`); render(); },
+  baseSell: () => { const i = UI.club, c = S.clubs[i], bc = c.baseCand; if (!bc) return; const comm = Math.round(playerPrice(bc.stars) * 0.6); addMoney(comm, i); c.baseCand = null; toast(`💰 ${bc.name} vendido da base por ${fmt(comm)}!`); render(); },
+  sellClub: d => {
+    const i = UI.club, c = S.clubs[i]; if (!c) return;
+    const saleVal = clubSaleValue(i), royalVal = Math.round(saleVal * 0.65), royalIps = Math.round(clubTotalIps(i) * 0.2);
+    if (d.mode === 'royalty') { addMoney(royalVal); S.royalties.push({ name: c.name, ips: royalIps }); toast(`🤝 ${c.name} vendido por ${fmt(royalVal)} + ${fmt(royalIps)}/s!`); }
+    else { addMoney(saleVal); toast(`💵 ${c.name} vendido por ${fmt(saleVal)}!`); }
+    if (RT[i] && RT[i].g) { world.remove(RT[i].g); } RT.splice(i, 1); S.clubs.splice(i, 1);
+    UI.club = Math.max(0, Math.min(UI.club, S.clubs.length - 1)); relayout(); closePanel(); save();
+  },
   fanUp: d => { const i = UI.club, c = S.clubs[i], f = FANS.find(x => x.k === d.k), l = c.fans[f.k]; if (l >= f.max || !spend(fanPrice(f, l, i))) return; c.fans[f.k] = l + 1; crowdBuild(i); emit('fans'); toast(`${f.i} ${f.n} melhorada!`); if (f.k === 'rojoes') fireworks(i, 6); if (f.k === 'mosaico') { setMosaic(i, true); RT[i].mosaicT = 6; } render(); },
   buyItem: d => { const c = S.clubs[UI.club]; if (!spend(+d.c)) return; c.pantry[d.k] += +d.n; emit('buy'); toast(`🛒 +${d.n} ${PANTRY.find(x => x.k === d.k).n.toLowerCase()} no CT do ${c.name}`); render(); },
   refill: d => { const i = UI.club, mt = S.clubs[i].eq[d.k], cost = refillCost(mt, i); if (!spend(cost)) return; mt.stock = 100; toast('📦 Estoque reposto!'); render(); },
@@ -1316,19 +1544,20 @@ function hud() {
 function update(dt) {
   wT += dt; updPlayer(dt);
   S.clubs.forEach((c, i) => { const ips = sponsorIps(i), sp = c.scouts.length ? c.scoutPct : 0; if (ips) { addMoney(ips * (1 - sp) * dt, i); c.scoutBudget += ips * sp * dt; } refreshSquad(i); clubTick(i, dt); updMatch(i, dt); updWalkers(i, dt); updComplaints(i, dt); });
-  updScouts(dt); updFans(dt); updFireworks(dt); updWaves(wT);
+  const extraIps = commIps() + royaltyIps(); if (extraIps) addMoney(extraIps * dt);
+  updScouts(dt); updFans(dt); updMerchSales(dt); updFireworks(dt); updWaves(wT);
   updFloats(dt / FAST);
   hudT -= dt; if (hudT <= 0) { hudT = 0.2; hud(); if (canBuyNext() !== plotState) refreshPlot(); evoCheck(); }
-  liveT -= dt / FAST; if (liveT <= 0) { liveT = 1; if ((UI.p === 'stadium' && UI.tab === 'partida') || (UI.p === 'office' && UI.tab === 'olheiros') || (UI.p === 'ct' && UI.tab === 'treino')) render(); }
+  liveT -= dt / FAST; if (liveT <= 0) { liveT = 1; if ((UI.p === 'stadium' && UI.tab === 'partida') || (UI.p === 'office' && UI.tab === 'olheiros') || (UI.p === 'ct' && (UI.tab === 'treino' || UI.tab === 'instalacoes')) || UI.p === 'boulevard') render(); }
   saveT -= dt; if (saveT <= 0) { saveT = 5; ensureMissions(); save(); }
 }
 function loop(now) { const dt = Math.min(0.05, (now - last) / 1000) * FAST; last = now; const n = Math.max(1, Math.ceil(dt / 0.05)); for (let k = 0; k < n; k++) update(dt / n); renderer.render(scene, camera); requestAnimationFrame(loop); }
 
 // ============================ INÍCIO ============================
 buildWorld();
-makePad(HUB.office.x, HUB.office.z + HUB.office.d / 2 + 1.6, ['Escritório'], '#38bdf8', () => openPanel('office'), 'office');
-makePad(HUB.shop.x, HUB.shop.z + HUB.shop.d / 2 + 1.8, ['Loja'], '#facc15', () => openPanel('shop'), 'shop');
-makePad(HUB.market.x, HUB.market.z + HUB.market.d / 2 + 2.2, ['Mercadinho'], '#22c55e', () => openPanel('market'), 'market');
+makePad(HUB.office.x, HUB.office.z + HUB.office.d / 2 + 1.6, ['Presidência'], '#38bdf8', () => openPanel('office'), 'office');
+makePad(HUB.shop.x, HUB.shop.z + HUB.shop.d / 2 + 1.8, ['Loja Oficial'], '#facc15', () => openPanel('shop'), 'shop');
+makePad(HUB.boulevard.x, HUB.boulevard.z + HUB.boulevard.d / 2 + 2.2, ['Alameda'], '#22c55e', () => openPanel('boulevard'), 'boulevard');
 rebuildPlayer(); relayout(); camT.set(player.x, 0, player.z); resize(); drawZoom(); ensureMissions(); hud();
 $('loading').remove();
 if (hadSave) { const away = (Date.now() - S.lastSave) / 1000; if (away > 30) showOffline(away); }
