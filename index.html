@@ -456,65 +456,117 @@ function numMat(n) {
 }
 function makePerson(o) {
   const root = new THREE.Group(), body = new THREE.Group(); root.add(body);
-  const legs = [], arms = [], skin = M(o.skin, 0.65), legM = o.pants || o.shorts || M('#1e1b2e', 0.8), sockM = o.socks || legM, shoeM = o.boots || M('#0b0812', 0.4);
-  // Pernas articuladas (coxa + panturrilha + chuteira/sapato)
+  const legs = [], knees = [], arms = [], elbows = [];
+  const skin = M(o.skin, 0.62), legM = o.pants || o.shorts || M('#1e1b2e', 0.8), sockM = o.socks || legM, shoeM = o.boots || M('#111827', 0.45);
+  const isPlayer = !!o.shorts && !o.suit;
+  // Geometrias orgânicas em cache (sem bordas de bloco)
+  const torsoG = geo('torsoL', () => {
+    const pts = [[0, -0.22], [0.165, -0.21], [0.15, -0.08], [0.165, 0.05], [0.205, 0.17], [0.185, 0.23], [0.075, 0.25], [0, 0.25]].map(([x, y]) => new THREE.Vector2(x, y));
+    return new THREE.LatheGeometry(pts, 16);
+  });
+  const limbG = geo('limbC', () => new THREE.CapsuleGeometry(0.058, 0.22, 6, 10));
+  const forearmG = geo('foreC', () => new THREE.CapsuleGeometry(0.044, 0.19, 6, 10));
+  const thighG = geo('thighC', () => new THREE.CapsuleGeometry(0.075, 0.24, 6, 10));
+  const shinG = geo('shinC', () => new THREE.CapsuleGeometry(0.058, 0.24, 6, 10));
+  // Pernas articuladas (quadril -> coxa -> joelho -> panturrilha/meião -> chuteira/sapato)
   for (const s of [-1, 1]) {
     const hip = new THREE.Group(); hip.position.set(s * 0.105, 0.72, 0); body.add(hip);
-    add(hip, G.cyl(0.082, 0.068, 0.34, 10), legM, 0, -0.17, 0, true);
-    add(hip, G.cyl(0.065, 0.052, 0.32, 10), sockM, 0, -0.49, 0, true);
-    const sh = add(hip, G.box(0.11, 0.08, 0.22), shoeM, 0, -0.68, 0.04, true);
-    add(hip, G.box(0.112, 0.02, 0.225), M('#f8fafc', 0.6), 0, -0.71, 0.04);
-    legs.push(hip);
+    add(hip, thighG, legM, 0, -0.17, 0, true);
+    const knee = new THREE.Group(); knee.position.set(0, -0.34, 0); hip.add(knee);
+    add(knee, shinG, sockM, 0, -0.17, 0, true);
+    if (isPlayer) add(knee, G.cyl(0.062, 0.062, 0.035, 10), M('#f8fafc', 0.7), 0, -0.05, 0);
+    const foot = add(knee, G.sph(0.068, 10, 8), shoeM, 0, -0.34, 0.045, true); foot.scale.set(0.88, 0.65, 1.65);
+    if (isPlayer) { const sole = add(knee, G.sph(0.066, 10, 8), M('#f8fafc', 0.6), 0, -0.36, 0.045); sole.scale.set(0.9, 0.3, 1.68); }
+    legs.push(hip); knees.push(knee);
   }
-  // Quadril + tronco anatômico (ombros mais largos que a cintura)
-  add(body, G.cyl(0.17, 0.165, 0.18, 12), o.shorts || legM, 0, 0.78, 0, true);
-  const torso = add(body, G.cyl(0.215, 0.16, 0.44, 12), o.shirt, 0, 1.07, 0, true); torso.scale.set(1, 1, 0.72);
-  add(body, G.cyl(0.058, 0.068, 0.1, 10), skin, 0, 1.32, 0);
+  // Quadril + tronco esculpido + pescoço
+  const pelvis = add(body, G.sph(0.175, 12, 10), o.shorts || legM, 0, 0.74, 0, true); pelvis.scale.set(1, 0.78, 0.75);
+  const torso = add(body, torsoG, o.shirt, 0, 1.04, 0, true); torso.scale.set(1, 1, 0.72);
+  add(body, G.cyl(0.055, 0.068, 0.11, 10), skin, 0, 1.31, 0);
   if (o.suit) {
-    add(body, G.box(0.11, 0.28, 0.025), M('#f8fafc', 0.5), 0, 1.13, 0.135);
-    add(body, G.box(0.042, 0.24, 0.03), M(o.tie, 0.35), 0, 1.12, 0.145);
-    for (const s of [-1, 1]) { const lap = add(body, G.box(0.05, 0.24, 0.025), o.shirt, s * 0.065, 1.14, 0.138); lap.rotation.z = s * 0.22; }
+    // Terno 3 peças com camisa branca, gravata e lapelas suaves
+    const vest = add(body, G.cyl(0.08, 0.045, 0.26, 10), M('#f8fafc', 0.5), 0, 1.15, 0.095); vest.scale.set(1, 1, 0.55);
+    const tie = add(body, G.cyl(0.022, 0.014, 0.24, 8), M(o.tie, 0.35), 0, 1.13, 0.145); tie.scale.set(1, 1, 0.45);
+    for (const s of [-1, 1]) { const lap = add(body, G.cyl(0.026, 0.018, 0.26, 8), o.shirt, s * 0.06, 1.15, 0.125); lap.rotation.z = s * 0.22; lap.scale.set(1, 1, 0.4); }
   }
-  if (o.num) { const np = add(body, G.plane(0.22, 0.22), numMat(o.num), 0, 1.08, -0.155); np.rotation.y = Math.PI; }
-  // Braços com manga, antebraço e mão
+  if (o.num) { const np = add(body, G.plane(0.21, 0.21), numMat(o.num), 0, 1.08, -0.152); np.rotation.y = Math.PI; }
+  // Braços articulados (ombro -> braço -> cotovelo -> antebraço -> mão)
   for (const s of [-1, 1]) {
-    const sh = new THREE.Group(); sh.position.set(s * 0.255, 1.25, 0); body.add(sh);
-    add(sh, G.sph(0.065, 10, 8), o.sleeve || o.shirt, 0, 0, 0, true);
-    add(sh, G.cyl(0.056, 0.048, 0.22, 10), o.sleeve || o.shirt, 0, -0.11, 0, true);
-    add(sh, G.cyl(0.046, 0.038, 0.22, 10), o.forearm || skin, 0, -0.32, 0, true);
-    add(sh, G.sph(0.045, 8, 6), o.forearm || skin, 0, -0.45, 0);
-    arms.push(sh);
+    const sh = new THREE.Group(); sh.position.set(s * 0.235, 1.23, 0); sh.rotation.z = s * 0.15; body.add(sh);
+    add(sh, G.sph(0.062, 10, 8), o.sleeve || o.shirt, 0, 0, 0, true);
+    add(sh, limbG, o.sleeve || o.shirt, 0, -0.13, 0, true);
+    const el = new THREE.Group(); el.position.set(0, -0.25, 0); sh.add(el);
+    if (o.suit) add(el, G.cyl(0.046, 0.046, 0.03, 8), M('#f8fafc', 0.5), 0, -0.19, 0);
+    add(el, forearmG, o.suit ? (o.sleeve || o.shirt) : (o.forearm || skin), 0, -0.10, 0, true);
+    const hand = add(el, G.sph(0.046, 10, 8), skin, 0, -0.24, 0.01, true); hand.scale.set(0.85, 1.15, 0.75);
+    arms.push(sh); elbows.push(el);
   }
-  // Cabeça proporcionada + rosto detalhado + cabelo em camadas
-  const head = new THREE.Group(); head.position.y = 1.50; body.add(head);
-  const skull = add(head, G.sph(0.175, 14, 12), skin, 0, 0, 0, true); skull.scale.set(0.92, 1.06, 0.96);
+  // Cabeça, rosto expressivo e cabelo esculpido
+  const head = new THREE.Group(); head.position.y = isPlayer ? 1.54 : 1.50; body.add(head);
+  const hr = isPlayer ? 0.215 : 0.172;
+  const skull = add(head, G.sph(hr, 16, 14), skin, 0, 0, 0, true); skull.scale.set(0.95, 1.03, 0.96);
+  const eyeZ = hr * 0.85, eyeY = isPlayer ? 0.01 : 0.018, eyeX = hr * 0.34;
   for (const s of [-1, 1]) {
-    add(head, G.sph(0.035, 8, 6), skin, s * 0.165, -0.01, 0);
-    add(head, G.sph(0.026, 8, 8), M('#ffffff', 0.3), s * 0.058, 0.015, 0.148);
-    add(head, G.sph(0.016, 8, 8), M('#111827', 0.2), s * 0.058, 0.015, 0.165);
-    add(head, G.box(0.045, 0.012, 0.015), M(o.hair, 0.9), s * 0.058, 0.052, 0.158);
+    add(head, G.sph(hr * 0.19, 8, 6), skin, s * hr * 0.92, -0.01, 0);
+    const es = isPlayer ? 0.038 : 0.024;
+    add(head, G.sph(es, 10, 8), M('#ffffff', 0.2), s * eyeX, eyeY, eyeZ);
+    add(head, G.sph(es * 0.65, 10, 8), M(isPlayer ? '#0f4c5c' : '#1f2937', 0.15), s * eyeX, eyeY, eyeZ + es * 0.45);
+    add(head, G.sph(es * 0.32, 8, 6), M('#050505', 0.1), s * eyeX, eyeY, eyeZ + es * 0.75);
+    if (isPlayer) add(head, G.sph(es * 0.18, 6, 6), MB('#ffffff'), s * eyeX + 0.008, eyeY + 0.01, eyeZ + es * 0.9);
+    const br = add(head, G.cyl(0.008, 0.008, hr * 0.28, 6), M(o.hair, 0.9), s * eyeX, eyeY + es * 1.35, eyeZ + 0.005); br.rotation.z = Math.PI / 2 - s * 0.12;
   }
-  const hairM = M(o.hair, 0.88);
-  const hTop = add(head, G.hemi(0.184), hairM, 0, 0.025, -0.015); hTop.rotation.x = -0.35; hTop.scale.set(0.95, 1.05, 1.0);
-  add(head, G.box(0.24, 0.06, 0.08), hairM, 0, 0.13, 0.08);
-  if (o.cap) { const c = add(head, G.hemi(0.19), M(o.cap, 0.6), 0, 0.035, 0); c.rotation.x = -0.1; add(head, G.box(0.24, 0.022, 0.16), M(o.cap, 0.6), 0, 0.07, 0.17); }
+  const nose = add(head, G.sph(hr * 0.12, 8, 6), skin, 0, -hr * 0.1, hr * 0.95); nose.scale.set(1, 0.85, 1.2);
+  const hairM = M(o.hair, 0.85);
+  const hTop = add(head, G.hemi(hr * 1.05), hairM, 0, hr * 0.14, -hr * 0.06, true); hTop.rotation.x = -0.35; hTop.scale.set(0.96, 1.02, 1.0);
+  if (isPlayer) {
+    // Topete ondulado estilo cartoon 3D
+    for (const [lx, ly, lz, rx, rz, sc] of [[0, hr * 0.82, hr * 0.32, 0.3, 0, 1.0], [-hr * 0.42, hr * 0.72, hr * 0.26, 0.2, 0.4, 0.82], [hr * 0.42, hr * 0.72, hr * 0.26, 0.2, -0.4, 0.82], [0, hr * 0.95, 0, -0.1, 0.2, 0.95]]) {
+      const lk = add(head, G.sph(hr * 0.42 * sc, 10, 8), hairM, lx, ly, lz, true); lk.scale.set(0.9, 0.75, 1.3); lk.rotation.set(rx, 0, rz);
+    }
+  } else {
+    // Cabelo executivo penteado para trás
+    const lk = add(head, G.sph(hr * 0.55, 10, 8), hairM, 0, hr * 0.78, hr * 0.18, true); lk.scale.set(1.25, 0.55, 1.1);
+  }
+  if (o.cap) { const c = add(head, G.hemi(hr * 1.09), M(o.cap, 0.6), 0, hr * 0.18, 0); c.rotation.x = -0.1; add(head, G.box(hr * 1.35, 0.022, hr * 0.9), M(o.cap, 0.6), 0, hr * 0.35, hr * 0.95); }
   if (o.shades) {
-    add(head, G.box(0.26, 0.045, 0.025), M('#050505', 0.1, 0.4), 0, 0.018, 0.172);
-    add(head, G.box(0.04, 0.015, 0.025), M('#d4af37', 0.2, 0.8), 0, 0.028, 0.175);
+    add(head, G.box(hr * 1.48, 0.044, 0.024), M('#050505', 0.08, 0.45), 0, eyeY, eyeZ + 0.022);
+    add(head, G.box(0.036, 0.014, 0.024), M('#d4af37', 0.2, 0.8), 0, eyeY + 0.01, eyeZ + 0.025);
   }
   const blob = add(root, G.circle(0.36), blobMat, 0, 0.012, 0); blob.rotation.x = -Math.PI / 2; blob.receiveShadow = false;
-  return { root, body, legs, arms, head, t: Math.random() * 10, bubble: null, bubbleT: 0, mode: 'idle' };
+  return { root, body, legs, knees, arms, elbows, head, t: Math.random() * 10, bubble: null, bubbleT: 0, mode: 'idle' };
 }
 function animP(p, mode, dt) {
-  p.t += dt; const b = p.body;
-  if (mode !== p.mode) { b.rotation.set(0, 0, 0); b.position.set(0, 0, 0); for (const l of p.legs) l.rotation.set(0, 0, 0); for (const a of p.arms) a.rotation.set(0, 0, 0); p.mode = mode; }
-  if (mode === 'sit') { p.legs[0].rotation.x = p.legs[1].rotation.x = -1.5; b.position.y = -0.28; p.arms[0].rotation.x = p.arms[1].rotation.x = -0.4; return; }
-  if (mode === 'lie') { b.rotation.x = -Math.PI / 2; b.position.set(0, 0.3, 0.7); return; }
-  if (mode === 'cheer') { b.position.y = Math.abs(Math.sin(p.t * 9)) * 0.3; p.arms[0].rotation.z = 2.7; p.arms[1].rotation.z = -2.7; return; }
-  if (mode === 'pump') { const s = Math.sin(p.t * 4); p.arms[0].rotation.x = p.arms[1].rotation.x = -1.6 + s * 0.7; b.position.y = Math.max(0, s) * 0.02; return; }
-  if (mode === 'kick') { const s = Math.max(0, Math.sin(p.t * 3)); p.legs[1].rotation.x = -s * 1.3; p.arms[0].rotation.x = s * 0.6; return; }
-  if (mode === 'walk' || mode === 'run') { const f = mode === 'run' ? 12 : 7.5, a = mode === 'run' ? 0.85 : 0.5, sw = Math.sin(p.t * f) * a; p.legs[0].rotation.x = sw; p.legs[1].rotation.x = -sw; p.arms[0].rotation.x = -sw * 0.9; p.arms[1].rotation.x = sw * 0.9; b.position.y = Math.abs(Math.sin(p.t * f)) * (mode === 'run' ? 0.06 : 0.025); b.rotation.x = mode === 'run' ? 0.12 : 0; return; }
-  for (const l of p.legs) l.rotation.x *= 0.8; for (const a of p.arms) a.rotation.x *= 0.8; b.position.y = Math.sin(p.t * 2.2) * 0.008;
+  p.t += dt; const b = p.body, kn = p.knees || [], el = p.elbows || [];
+  if (mode !== p.mode) {
+    b.rotation.set(0, 0, 0); b.position.set(0, 0, 0);
+    for (const l of p.legs) l.rotation.set(0, 0, 0);
+    for (const k of kn) k.rotation.set(0, 0, 0);
+    p.arms.forEach((a, idx) => a.rotation.set(0, 0, (idx ? 1 : -1) * 0.15));
+    for (const e of el) e.rotation.set(0, 0, 0);
+    p.mode = mode;
+  }
+  if (mode === 'sit') { p.legs[0].rotation.x = p.legs[1].rotation.x = -1.45; for (const k of kn) k.rotation.x = 1.45; b.position.y = -0.32; p.arms[0].rotation.x = p.arms[1].rotation.x = -0.35; for (const e of el) e.rotation.x = -0.5; return; }
+  if (mode === 'lie') { b.rotation.x = -Math.PI / 2; b.position.set(0, 0.28, 0.72); return; }
+  if (mode === 'cheer') { b.position.y = Math.abs(Math.sin(p.t * 9)) * 0.28; p.arms[0].rotation.z = 2.6; p.arms[1].rotation.z = -2.6; for (const e of el) e.rotation.x = -0.3; return; }
+  if (mode === 'pump') { const s = Math.sin(p.t * 4); p.arms[0].rotation.x = p.arms[1].rotation.x = -1.3 + s * 0.6; for (const e of el) e.rotation.x = -0.9; b.position.y = Math.max(0, s) * 0.02; return; }
+  if (mode === 'kick') { const s = Math.max(0, Math.sin(p.t * 3.5)); p.legs[1].rotation.x = -s * 1.15; if (kn[1]) kn[1].rotation.x = s * 0.55; p.arms[0].rotation.x = s * 0.5; if (el[0]) el[0].rotation.x = -0.5; return; }
+  if (mode === 'walk' || mode === 'run') {
+    const f = mode === 'run' ? 11.5 : 7.2, a = mode === 'run' ? 0.78 : 0.48, sw = Math.sin(p.t * f) * a;
+    p.legs[0].rotation.x = sw; p.legs[1].rotation.x = -sw;
+    if (kn[0]) kn[0].rotation.x = Math.max(0, -sw) * (mode === 'run' ? 1.1 : 0.65);
+    if (kn[1]) kn[1].rotation.x = Math.max(0, sw) * (mode === 'run' ? 1.1 : 0.65);
+    p.arms[0].rotation.x = -sw * 0.85; p.arms[1].rotation.x = sw * 0.85;
+    for (const e of el) e.rotation.x = mode === 'run' ? -1.05 : -0.38;
+    b.position.y = Math.abs(Math.sin(p.t * f)) * (mode === 'run' ? 0.055 : 0.022);
+    b.rotation.x = mode === 'run' ? 0.11 : 0.02;
+    b.rotation.y = Math.sin(p.t * f) * 0.05;
+    return;
+  }
+  for (const l of p.legs) l.rotation.x *= 0.82;
+  for (const k of kn) k.rotation.x *= 0.82;
+  for (const a of p.arms) a.rotation.x *= 0.82;
+  for (const e of el) e.rotation.x = e.rotation.x * 0.82 - 0.14 * 0.18;
+  b.position.y = Math.sin(p.t * 2.2) * 0.008;
 }
 function setBubble(p, emoji, dur = 2.6) { if (p.bubble) { p.root.remove(p.bubble); p.bubble = null; } if (!emoji) return; p.bubble = bubbleSprite(emoji); p.bubble.position.y = 2.15; p.root.add(p.bubble); p.bubbleT = dur; }
 function tickBubble(p, dt) { if (p.bubble && p.bubbleT > 0) { p.bubbleT -= dt; if (p.bubbleT <= 0) setBubble(p, null); } }
